@@ -1,0 +1,301 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/ui/Header.astro';
+import Footer from '../../components/ui/Footer.astro';
+
+const title = "Understanding Provider Types - HIV Connect Central NJ";
+const description = "Learn about different types of HIV healthcare providers including FQHCs, ASOs, Community Health Centers, and Private Practices to find the right care for you.";
+---
+
+<BaseLayout title={title} description={description}>
+  <Header />
+  
+  <main id="main-content" class="flex-1">
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-br from-primary-600 to-secondary-600 py-12 overflow-hidden">
+      <!-- Hero Background Image -->
+      <div class="absolute inset-0 opacity-20">
+        <img 
+          src="/HIV Treatment Website/Shutterstock Pictures/shutterstock_144206617.jpg" 
+          alt="" 
+          class="w-full h-full object-cover object-center"
+          loading="eager"
+        />
+      </div>
+      <!-- Dark overlay for text contrast -->
+      <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-4xl mx-auto">
+          <h1 class="text-4xl lg:text-5xl font-bold text-white mb-6 drop-shadow-lg">
+            Understanding Provider Types
+          </h1>
+          <p class="text-xl text-white mb-8 drop-shadow-md">
+            Learn about different types of HIV healthcare providers to find the right care and support for your needs.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Provider Types Content -->
+    <section class="py-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="mb-12">
+          <p class="text-lg text-gray-600 leading-relaxed">
+            HIV care is provided by different types of healthcare organizations, each with unique strengths and specialties. 
+            Understanding these distinctions can help you choose the provider that best meets your specific needs, insurance situation, and preferences.
+          </p>
+        </div>
+
+        <!-- Provider Type Cards -->
+        <div class="space-y-8">
+          
+          <!-- FQHC -->
+          <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">FQHC</h3>
+                <h4 class="text-lg font-semibold text-gray-700 mb-4">Federally Qualified Health Center</h4>
+                <p class="text-gray-600 mb-4">
+                  FQHCs are community-based healthcare providers that receive federal funding to provide comprehensive primary care services to underserved populations. They serve patients regardless of their ability to pay.
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 class="font-semibold text-gray-900 mb-2">✅ What to Expect:</h5>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                      <li>• Comprehensive HIV care and treatment</li>
+                      <li>• Sliding fee scale based on income</li>
+                      <li>• Multi-language services</li>
+                      <li>• Same-day appointments often available</li>
+                      <li>• Case management and support services</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 class="font-semibold text-gray-900 mb-2">💰 Cost & Insurance:</h5>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                      <li>• Accept Medicaid and Medicare</li>
+                      <li>• Sliding scale for uninsured</li>
+                      <li>• Cannot turn patients away for inability to pay</li>
+                      <li>• Required to provide financial counseling</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ASO -->
+          <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">ASO</h3>
+                <h4 class="text-lg font-semibold text-gray-700 mb-4">AIDS Service Organization</h4>
+                <p class="text-gray-600 mb-4">
+                  ASOs are non-profit organizations specifically dedicated to providing HIV/AIDS support services, advocacy, and community programs. They focus on comprehensive care coordination and support services.
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 class="font-semibold text-gray-900 mb-2">✅ What to Expect:</h5>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                      <li>• Case management and care coordination</li>
+                      <li>• Support groups and peer counseling</li>
+                      <li>• Housing and financial assistance</li>
+                      <li>• Mental health and substance abuse support</li>
+                      <li>• Educational workshops and resources</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 class="font-semibold text-gray-900 mb-2">🤝 Community Focus:</h5>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                      <li>• Peer navigation programs</li>
+                      <li>• LGBTQ+ affirming services</li>
+                      <li>• Cultural competency training</li>
+                      <li>• Advocacy and policy work</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Community Health Center -->
+          <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Community Health Center</h3>
+                <p class="text-gray-600 mb-4">
+                  Community-based healthcare facilities that provide comprehensive primary care services to all patients regardless of ability to pay. They serve diverse communities with culturally competent care.
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 class="font-semibold text-gray-900 mb-2">✅ What to Expect:</h5>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                      <li>• Primary care and HIV specialty services</li>
+                      <li>• Integrated behavioral health</li>
+                      <li>• Pharmacy services</li>
+                      <li>• Transportation assistance</li>
+                      <li>• Community health workers</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 class="font-semibold text-gray-900 mb-2">🏘️ Community Approach:</h5>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                      <li>• Local community governance</li>
+                      <li>• Cultural and linguistic services</li>
+                      <li>• Health education programs</li>
+                      <li>• Preventive care focus</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Private Practice -->
+          <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Private Practice</h3>
+                <p class="text-gray-600 mb-4">
+                  Privately-owned medical practices that provide specialized HIV care and treatment services. Often led by infectious disease specialists or HIV specialists.
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 class="font-semibold text-gray-900 mb-2">✅ What to Expect:</h5>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                      <li>• Specialized HIV medical expertise</li>
+                      <li>• Personalized treatment plans</li>
+                      <li>• Shorter wait times</li>
+                      <li>• Continuity of care with same provider</li>
+                      <li>• Latest treatment innovations</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 class="font-semibold text-gray-900 mb-2">💼 Private Model:</h5>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                      <li>• Insurance-based payment</li>
+                      <li>• May have patient assistance programs</li>
+                      <li>• Flexible scheduling options</li>
+                      <li>• Referral networks for specialists</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hospital System -->
+          <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Hospital System</h3>
+                <p class="text-gray-600 mb-4">
+                  Hospital-based healthcare systems that provide comprehensive medical services including HIV specialty care, often with access to the full range of medical specialties.
+                </p>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h5 class="font-semibold text-gray-900 mb-2">✅ What to Expect:</h5>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                      <li>• Full-service medical care</li>
+                      <li>• Access to multiple specialists</li>
+                      <li>• Advanced diagnostic services</li>
+                      <li>• Inpatient and outpatient care</li>
+                      <li>• Emergency services available</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 class="font-semibold text-gray-900 mb-2">🏥 Hospital Resources:</h5>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                      <li>• Comprehensive electronic health records</li>
+                      <li>• Coordinated care teams</li>
+                      <li>• Research and clinical trials</li>
+                      <li>• Financial counseling services</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Choosing the Right Provider -->
+        <div class="mt-16 bg-primary-50 rounded-xl p-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Choosing the Right Provider for You</h2>
+          <div class="grid md:grid-cols-3 gap-6">
+            <div class="text-center">
+              <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 mb-2">Consider Your Needs</h3>
+              <p class="text-sm text-gray-600">Think about what services you need most: medical care, support services, or both.</p>
+            </div>
+            <div class="text-center">
+              <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 mb-2">Check Insurance & Cost</h3>
+              <p class="text-sm text-gray-600">Verify insurance acceptance and ask about sliding scale or assistance programs.</p>
+            </div>
+            <div class="text-center">
+              <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                </svg>
+              </div>
+              <h3 class="font-semibold text-gray-900 mb-2">Location & Access</h3>
+              <p class="text-sm text-gray-600">Choose providers that are accessible by location, hours, and transportation options.</p>
+            </div>
+          </div>
+          <div class="text-center mt-8">
+            <a href="/find-services" class="btn-primary">
+              Find Providers Near You
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>

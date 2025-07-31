@@ -16,9 +16,9 @@ const description = t('site.description', currentLanguage);
   
   <main id="main-content" class="flex-1" role="main" aria-label="Main content">
     <!-- Hero Section -->
-    <section class="relative bg-gradient-to-br from-primary-50 to-secondary-50 py-16 lg:py-24 overflow-hidden" aria-labelledby="hero-heading">
+    <section class="relative bg-gradient-to-br from-primary-600 to-secondary-600 py-16 lg:py-24 overflow-hidden" aria-labelledby="hero-heading">
       <!-- Hero Background Image -->
-      <div class="absolute inset-0 opacity-15">
+      <div class="absolute inset-0 opacity-30">
         <img 
           src="/HIV Treatment Website/Two Men Talking to Each Other.jpeg" 
           alt="" 
@@ -26,13 +26,17 @@ const description = t('site.description', currentLanguage);
           loading="eager"
         />
       </div>
+      <!-- Strong dark overlay for white text contrast (WCAG compliance) -->
+      <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+      <!-- Additional gradient overlay for enhanced readability -->
+      <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/50"></div>
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-4xl mx-auto">
-          <h1 id="hero-heading" class="text-4xl lg:text-6xl font-bold text-gray-900 mb-6" set:html={t('homepage.hero.title', currentLanguage)}></h1>
-          <p class="text-xl lg:text-2xl text-gray-700 mb-8 leading-relaxed">
+          <h1 id="hero-heading" class="text-4xl lg:text-6xl font-bold text-white mb-6 drop-shadow-lg" set:html={t('homepage.hero.title', currentLanguage)}></h1>
+          <p class="text-xl lg:text-2xl text-white mb-8 leading-relaxed drop-shadow-md">
             {t('homepage.hero.subtitle', currentLanguage)}
           </p>
-          <p class="text-lg text-gray-600 mb-10">
+          <p class="text-lg text-gray-100 mb-10 drop-shadow-md">
             {t('homepage.hero.confidential', currentLanguage)}
           </p>
           

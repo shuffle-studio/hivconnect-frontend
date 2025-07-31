@@ -33,6 +33,32 @@ const locationImages: { [key: string]: string } = {
 
 const locationImage = locationImages[provider.id];
 
+// Provider type explanations
+const providerTypeInfo: { [key: string]: { full: string; description: string } } = {
+  'FQHC': {
+    full: 'Federally Qualified Health Center',
+    description: 'Community-based healthcare provider that receives federal funding to provide comprehensive primary care services to underserved populations'
+  },
+  'ASO': {
+    full: 'AIDS Service Organization',
+    description: 'Non-profit organization specifically dedicated to providing HIV/AIDS support services, advocacy, and community programs'
+  },
+  'Community Health Center': {
+    full: 'Community Health Center',
+    description: 'Healthcare facility that provides comprehensive primary care services to all patients regardless of ability to pay'
+  },
+  'Private Practice': {
+    full: 'Private Medical Practice',
+    description: 'Privately-owned medical practice providing specialized HIV care and treatment services'
+  },
+  'Hospital': {
+    full: 'Hospital System',
+    description: 'Hospital-based healthcare system providing comprehensive medical services including HIV specialty care'
+  }
+};
+
+const typeInfo = providerTypeInfo[provider.type] || { full: provider.type, description: 'Healthcare provider' };
+
 // Count available services
 const serviceCount = Object.values(provider.services).reduce((count, category) => {
   return count + Object.values(category).filter(Boolean).length;
@@ -69,8 +95,11 @@ function formatHours(hours: any) {
         </a>
       </h3>
       <div class="flex flex-wrap gap-2 mb-3">
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-100 text-secondary-800">
-          {provider.type}
+        <span 
+          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-100 text-secondary-800 cursor-help" 
+          title={`${typeInfo.full}: ${typeInfo.description}`}
+        >
+          {typeInfo.full}
         </span>
         {provider.ryan_white_parts.map(part => (
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
