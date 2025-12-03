@@ -4,10 +4,13 @@ import Header from '../../components/ui/Header.astro';
 import Footer from '../../components/ui/Footer.astro';
 import ProviderCard from '../../components/providers/ProviderCard.astro';
 import ProviderSearch from '../../components/providers/ProviderSearch';
-import { providers } from '../../data/providers';
+import { fetchProviders } from '../../lib/api';
 
 const title = "Find HIV Care & Support Services";
 const description = "Discover comprehensive HIV testing, treatment, and support services across Middlesex, Somerset, and Hunterdon counties in Central New Jersey.";
+
+// Fetch providers from PayloadCMS API
+const providers = await fetchProviders();
 ---
 
 <BaseLayout title={title} description={description}>

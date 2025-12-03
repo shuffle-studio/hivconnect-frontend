@@ -3,9 +3,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/ui/Header.astro';
 import Footer from '../../components/ui/Footer.astro';
 import ProviderCard from '../../components/providers/ProviderCard.astro';
-import { providers } from '../../data/providers';
+import { fetchProviders } from '../../lib/api';
 
-// Filter providers that offer HIV treatment
+// Fetch providers from API and filter for treatment services
+const providers = await fetchProviders();
 const treatmentProviders = providers.filter(provider => provider.services.medical_care.hiv_treatment);
 const prepProviders = providers.filter(provider => provider.services.medical_care.prep_services);
 

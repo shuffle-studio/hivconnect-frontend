@@ -2,10 +2,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/ui/Header.astro';
 import Footer from '../../components/ui/Footer.astro';
-import { providers } from '../../data/providers';
+import { fetchProviders, fetchProviderBySlug } from '../../lib/api';
 import type { Provider } from '../../types/provider';
 
 export async function getStaticPaths() {
+  // Fetch all providers from API for static generation
+  const providers = await fetchProviders();
+
   return providers.map((provider) => ({
     params: { id: provider.id },
     props: { provider },
