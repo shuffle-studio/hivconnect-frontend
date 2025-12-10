@@ -57,6 +57,43 @@ interface ResourceResponse {
   hasNextPage: boolean;
 }
 
+// Page type definitions
+export interface Page {
+  id: number;
+  title: string;
+  slug: string;
+  content: any; // Rich text content
+  excerpt?: string;
+  meta?: {
+    title?: string;
+    description?: string;
+    image?: {
+      id: number;
+      url: string;
+      alt?: string;
+    };
+  };
+  featuredImage?: {
+    id: number;
+    url: string;
+    alt?: string;
+  };
+  showInNavigation: boolean;
+  language: 'english' | 'spanish' | 'both';
+  status: 'draft' | 'published' | 'archived';
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface PageResponse {
+  docs: Page[];
+  totalDocs: number;
+  limit: number;
+  totalPages: number;
+  page: number;
+  hasNextPage: boolean;
+}
+
 // PayloadCMS provider structure (from backend)
 interface PayloadProvider {
   id: number;
@@ -401,4 +438,64 @@ export async function fetchResourcesByCategory(
     grouped[category].push(resource);
     return grouped;
   }, {} as Record<string, Resource[]>);
+}
+
+// Fetch all published pages
+export async function fetchPages(language: 'english' | 'spanish' | 'both' = 'english'): Promise<Page[]> {
+  try {
+    const allPages: Page[] = [];
+    let page = 1;
+    let hasMore = true;
+
+    // Build language filter - show pages that match language or are marked as 'both'
+    const languageFilter = language === 'both'
+      ? ''
+      : `&where[or][0][language][equals]=${language}&where[or][1][language][equals]=both`;
+
+    // Fetch all pages, filtering for published pages only
+    while (hasMore) {
+      const response = await fetch(
+        `${API_BASE_URL}/pages?where[status][equals]=published${languageFilter}&limit=100&page=${page}&sort=title`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch pages: ${response.statusText}`);
+      }
+
+      const data: PageResponse = await response.json();
+      allPages.push(...data.docs);
+
+      hasMore = data.hasNextPage;
+      page++;
+    }
+
+    return allPages;
+  } catch (error) {
+    console.error('Error fetching pages:', error);
+    throw error;
+  }
+}
+
+// Fetch a single page by slug (only if published)
+export async function fetchPageBySlug(slug: string): Promise<Page | null> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/pages?where[slug][equals]=${slug}&where[status][equals]=published&limit=1`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch page: ${response.statusText}`);
+    }
+
+    const data: PageResponse = await response.json();
+
+    if (data.docs.length === 0) {
+      return null;
+    }
+
+    return data.docs[0];
+  } catch (error) {
+    console.error(`Error fetching page ${slug}:`, error);
+    return null;
+  }
 }

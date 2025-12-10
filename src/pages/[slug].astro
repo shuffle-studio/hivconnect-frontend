@@ -1,0 +1,242 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/ui/Header.astro';
+import Footer from '../components/ui/Footer.astro';
+import { fetchPages, fetchPageBySlug, type Page } from '../lib/api';
+
+// Generate static paths for all published pages
+export async function getStaticPaths() {
+  try {
+    const pages = await fetchPages('english'); // TODO: Add language detection
+
+    return pages.map((page: Page) => ({
+      params: { slug: page.slug },
+      props: { page },
+    }));
+  } catch (error) {
+    console.error('Error generating static paths for pages:', error);
+    return [];
+  }
+}
+
+const { page } = Astro.props;
+
+// If page not found (shouldn't happen in SSG but good to have)
+if (!page) {
+  return Astro.redirect('/404');
+}
+
+// Use meta title if provided, otherwise use page title
+const title = page.meta?.title || page.title;
+const description = page.meta?.description || page.excerpt || `${page.title} - HIV Connect Central NJ`;
+const ogImage = page.meta?.image?.url || page.featuredImage?.url || '/HIV Treatment Website/MSHTGA Logo Reprise.png';
+---
+
+<BaseLayout title={title} description={description} ogImage={ogImage}>
+  <Header />
+
+  <main id="main-content" class="flex-1">
+    <!-- Hero Section (if featured image exists) -->
+    {page.featuredImage && (
+      <section class="relative bg-gradient-to-br from-primary-600 to-secondary-600 py-16">
+        <div class="absolute inset-0 opacity-30">
+          <img
+            src={page.featuredImage.url}
+            alt={page.featuredImage.alt || ''}
+            class="w-full h-full object-cover"
+            loading="eager"
+          />
+        </div>
+        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/50"></div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center max-w-4xl mx-auto">
+            <h1 class="text-4xl lg:text-5xl font-bold text-white mb-6 drop-shadow-lg">
+              {page.title}
+            </h1>
+            {page.excerpt && (
+              <p class="text-xl lg:text-2xl text-white mb-8 drop-shadow-md">
+                {page.excerpt}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Content Section -->
+    <section class="py-16 bg-gray-50">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Title (if no featured image) -->
+        {!page.featuredImage && (
+          <div class="text-center mb-12">
+            <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+              {page.title}
+            </h1>
+            {page.excerpt && (
+              <p class="text-xl text-gray-600">
+                {page.excerpt}
+              </p>
+            )}
+          </div>
+        )}
+
+        <!-- Rich Text Content -->
+        <article class="prose prose-lg prose-primary max-w-none">
+          <!-- TODO: Add rich text renderer for Lexical content -->
+          <!-- For now, this will display the JSON structure -->
+          <!-- To properly render, need to install and configure @payloadcms/richtext-lexical renderer -->
+          <div class="page-content">
+            {typeof page.content === 'string' ? (
+              <div set:html={page.content} />
+            ) : (
+              <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                      Rich text content requires a renderer to be installed. Please contact the site administrator.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </article>
+
+        <!-- Last Updated -->
+        <div class="mt-12 pt-6 border-t border-gray-200">
+          <p class="text-sm text-gray-500">
+            Last updated: {new Date(page.updatedAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section (optional - can be customized per page) -->
+    <section class="bg-white py-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">
+          Need Help or Have Questions?
+        </h2>
+        <p class="text-xl text-gray-600 mb-8">
+          Our team is here to support you with any questions or concerns.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/find-services" class="btn-primary">
+            Find Services
+          </a>
+          <a href="/contact" class="btn-secondary">
+            Contact Us
+          </a>
+          <a href="tel:732-937-5288" class="btn-outline">
+            Call: (732) 937-5288
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  /* Prose styling for rich text content */
+  .prose {
+    color: #374151;
+  }
+
+  .prose h2 {
+    color: #111827;
+    font-weight: 700;
+    font-size: 1.875rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    line-height: 1.25;
+  }
+
+  .prose h3 {
+    color: #1f2937;
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.375;
+  }
+
+  .prose h4 {
+    color: #374151;
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+  }
+
+  .prose p {
+    margin-bottom: 1.25rem;
+    line-height: 1.75;
+  }
+
+  .prose ul,
+  .prose ol {
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    padding-left: 1.625rem;
+  }
+
+  .prose li {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .prose a {
+    color: #dc2626;
+    text-decoration: underline;
+    font-weight: 500;
+  }
+
+  .prose a:hover {
+    color: #991b1b;
+  }
+
+  .prose strong {
+    color: #111827;
+    font-weight: 600;
+  }
+
+  .prose blockquote {
+    border-left: 4px solid #dc2626;
+    padding-left: 1rem;
+    font-style: italic;
+    color: #4b5563;
+    margin: 1.5rem 0;
+  }
+
+  .prose img {
+    border-radius: 0.5rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .prose hr {
+    border-color: #e5e7eb;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+  }
+
+  /* Page-specific content styling */
+  .page-content {
+    font-size: 1.125rem;
+    line-height: 1.75;
+  }
+</style>
