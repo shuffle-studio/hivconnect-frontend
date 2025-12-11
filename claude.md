@@ -35,20 +35,42 @@ See [Linear Integration & Workflow](#linear-integration--workflow) section below
 
 ---
 
+## 🚨 DEPLOYMENT POLICY - PRODUCTION ONLY
+
+**CRITICAL**: This project does **NOT** use staging environments per explicit client directive.
+
+### Environments
+- ✅ **Local Development**: `localhost:4321` (frontend) and `localhost:3000` (backend)
+- ✅ **Production**: `https://hivconnectcnj.org` (live site)
+- ❌ **Staging**: REMOVED - Do not create staging environments
+
+### Auto-Rebuild System
+**Frontend automatically rebuilds when backend content changes** via webhook:
+1. Edit content in PayloadCMS admin
+2. Webhook triggers Cloudflare Pages rebuild
+3. Frontend live with updates in 2-3 minutes
+
+**See**: `DEPLOYMENT_POLICY.md` for complete details
+
+**Collections with auto-rebuild**: Providers, Resources, Blog, PDFLibrary, FAQs, Pages, Events, MembershipApplications, SiteSettings
+
+---
+
 ## Table of Contents
 
-1. [Project Overview](#project-overview)
-2. [Current Implementation](#current-implementation)
-3. [Backend Requirements](#backend-requirements)
-4. [Collections Architecture](#collections-architecture)
-5. [Implementation Phases](#implementation-phases)
-6. [Technical Decisions](#technical-decisions)
-7. [Environment Setup](#environment-setup)
-8. [File Location Reference](#file-location-reference)
-9. [QA Checklists](#qa-checklists)
-10. [Linear Integration & Workflow](#linear-integration--workflow)
-11. [Development Workflow](#development-workflow)
-12. [Next Steps](#next-steps)
+1. [Deployment Policy - Production Only](#-deployment-policy---production-only)
+2. [Project Overview](#project-overview)
+3. [Current Implementation](#current-implementation)
+4. [Backend Requirements](#backend-requirements)
+5. [Collections Architecture](#collections-architecture)
+6. [Implementation Phases](#implementation-phases)
+7. [Technical Decisions](#technical-decisions)
+8. [Environment Setup](#environment-setup)
+9. [File Location Reference](#file-location-reference)
+10. [QA Checklists](#qa-checklists)
+11. [Linear Integration & Workflow](#linear-integration--workflow)
+12. [Development Workflow](#development-workflow)
+13. [Next Steps](#next-steps)
 
 ---
 
@@ -381,36 +403,35 @@ The backend will use a **fully cloud-native Cloudflare stack**:
 - SQL-compatible, familiar syntax
 - Bindings in Workers for direct access
 
-**Databases**:
-- **Staging**: `hivconnect-cms-staging`
-- **Production**: `hivconnect-cms-prod`
+**Database**:
+- **Production**: `hivconnect-db-production` (Cloudflare D1)
 
 **Migration Workflow**:
 ```bash
 # Payload handles migrations
-npm run payload:migrate
+NODE_ENV=production PAYLOAD_SECRET=ignore pnpm payload migrate:create
 
-# Review migrations before production
+# Run migration on production
+CLOUDFLARE_ENV=production pnpm run deploy:database
+
+# Review migrations before deploying
 # All migrations must be PR-reviewed by Kevin
 ```
 
-**Why Separate DBs?**
-- Staging for testing new features, data imports
-- Production for live site
-- Prevents accidental data corruption
-
 ### Environments
 
-| Environment | Purpose | Database | R2 Bucket | URL |
-|-------------|---------|----------|-----------|-----|
-| **Local** | Development | Local SQLite | Local filesystem | `localhost:3000` |
-| **Staging** | Testing, QA | `hivconnect-cms-staging` | `hivconnect-pdfs-staging` | `staging-api.hivconnectcnj.org` |
-| **Production** | Live site | `hivconnect-cms-prod` | `hivconnect-pdfs` | `api.hivconnectcnj.org` |
+| Environment | Purpose | Database | R2 Bucket | Backend URL | Frontend URL |
+|-------------|---------|----------|-----------|-------------|--------------|
+| **Local** | Development | Local SQLite | Local filesystem | `localhost:3000` | `localhost:4321` |
+| **Production** | Live site | `hivconnect-db-production` | `hivconnect-media-production` | `hivconnect-backend-production.shuffle-seo.workers.dev` | `hivconnectcnj.org` |
 
-**Environment Separation**:
-- Staging and production MUST have separate databases and buckets
-- No cross-contamination of data
-- Staging can be reset and reseeded without affecting production
+**⚠️ NO STAGING** per client directive - see [Deployment Policy](#-deployment-policy---production-only)
+
+**Environment Policy**:
+- Local for development and testing
+- Production for live site
+- Content changes in production trigger automatic frontend rebuilds (2-3 min)
+- Rollback via git if needed
 
 ---
 
