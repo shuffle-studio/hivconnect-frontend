@@ -1,0 +1,220 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { fetchUpcomingEvents, fetchPastEvents, extractTextFromLexical } from '../../lib/api';
+import type { Event } from '../../lib/api';
+
+const title = 'Events & Calendar';
+const description = 'Upcoming events, meetings, and activities from the HIV Connect Central NJ community.';
+
+// Fetch upcoming and past events
+let upcomingEvents: Event[] = [];
+let pastEvents: Event[] = [];
+let error: string | null = null;
+
+try {
+  upcomingEvents = await fetchUpcomingEvents();
+  pastEvents = await fetchPastEvents();
+} catch (e) {
+  error = e instanceof Error ? e.message : 'Failed to load events';
+  console.error('Error fetching events:', e);
+}
+
+// Helper to format date
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+// Helper to format time
+function formatTime(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
+
+// Helper to get location string
+function getLocationString(event: Event): string {
+  const { location } = event;
+
+  if (location.type === 'virtual') {
+    return 'Virtual Event';
+  }
+
+  if (location.type === 'hybrid') {
+    return 'Hybrid (In-Person & Virtual)';
+  }
+
+  // In-person
+  const parts = [];
+  if (location.venueName) parts.push(location.venueName);
+  if (location.city && location.state) parts.push(`${location.city}, ${location.state}`);
+  return parts.join(' • ') || 'Location TBA';
+}
+
+// Helper to get category label
+function getCategoryLabel(category: string): string {
+  const labels: Record<string, string> = {
+    'planning-council': 'Planning Council',
+    'committee': 'Committee Meeting',
+    'community': 'Community Event',
+    'training': 'Training/Workshop',
+    'health-fair': 'Health Fair',
+    'support-group': 'Support Group',
+    'other': 'Event',
+  };
+  return labels[category] || category;
+}
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="min-h-screen bg-gray-50 py-12">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="mb-12 text-center">
+        <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl mb-4">
+          Events & Calendar
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Join us for upcoming meetings, health fairs, support groups, and community events
+        </p>
+      </div>
+
+      {error && (
+        <div class="mb-8 rounded-lg bg-red-50 p-4 text-red-800">
+          <p class="font-medium">Error loading events</p>
+          <p class="text-sm">{error}</p>
+        </div>
+      )}
+
+      {!error && upcomingEvents.length === 0 && pastEvents.length === 0 && (
+        <div class="text-center py-12">
+          <p class="text-gray-600 text-lg">No events currently scheduled. Check back soon!</p>
+        </div>
+      )}
+
+      {!error && (
+        <>
+          <!-- Upcoming Events -->
+          {upcomingEvents.length > 0 && (
+            <section class="mb-16">
+              <h2 class="text-3xl font-bold text-gray-900 mb-6">Upcoming Events</h2>
+              <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {upcomingEvents.map((event) => (
+                  <a
+                    href={`/events/${event.slug}`}
+                    class="group block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-200"
+                  >
+                    {event.featuredImage && (
+                      <div class="aspect-video overflow-hidden">
+                        <img
+                          src={event.featuredImage.url}
+                          alt={event.featuredImage.alt || event.title}
+                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                        />
+                      </div>
+                    )}
+
+                    <div class="p-6">
+                      {/* Category Badge */}
+                      <div class="mb-3">
+                        <span class="inline-flex items-center rounded-full bg-primary-100 px-3 py-1 text-xs font-medium text-primary-800">
+                          {getCategoryLabel(event.category)}
+                        </span>
+                        {event.featured && (
+                          <span class="ml-2 inline-flex items-center rounded-full bg-accent-100 px-3 py-1 text-xs font-medium text-accent-800">
+                            Featured
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <h3 class="text-xl font-semibold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">
+                        {event.title}
+                      </h3>
+
+                      {/* Date & Time */}
+                      <div class="space-y-2 text-sm text-gray-600 mb-4">
+                        <div class="flex items-start">
+                          <svg class="w-5 h-5 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <div>
+                            <div class="font-medium text-gray-900">{formatDate(event.startDate)}</div>
+                            <div>{formatTime(event.startDate)}</div>
+                          </div>
+                        </div>
+
+                        {/* Location */}
+                        <div class="flex items-center">
+                          <svg class="w-5 h-5 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span>{getLocationString(event)}</span>
+                        </div>
+                      </div>
+
+                      {/* Description Preview */}
+                      {event.description && (
+                        <p class="text-gray-600 text-sm line-clamp-2">
+                          {extractTextFromLexical(event.description).substring(0, 150)}...
+                        </p>
+                      )}
+
+                      {/* Learn More Link */}
+                      <div class="mt-4 text-primary-600 font-medium text-sm group-hover:text-primary-700">
+                        Learn more →
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <!-- Past Events -->
+          {pastEvents.length > 0 && (
+            <section>
+              <h2 class="text-3xl font-bold text-gray-900 mb-6">Past Events</h2>
+              <div class="space-y-4">
+                {pastEvents.slice(0, 10).map((event) => (
+                  <a
+                    href={`/events/${event.slug}`}
+                    class="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-200"
+                  >
+                    <div class="flex items-start justify-between">
+                      <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-2">
+                          <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                            {getCategoryLabel(event.category)}
+                          </span>
+                          <span class="text-sm text-gray-500">
+                            {formatDate(event.startDate)}
+                          </span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 hover:text-primary-600">
+                          {event.title}
+                        </h3>
+                        <p class="text-gray-600 text-sm mt-1">
+                          {getLocationString(event)}
+                        </p>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+        </>
+      )}
+    </div>
+  </div>
+</BaseLayout>
