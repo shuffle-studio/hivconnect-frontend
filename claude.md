@@ -2172,6 +2172,14 @@ Part of: SHU-9 (Client Testing Follow-up & Support)
 - Document what was committed in the response to user
 - User trusts Claude Code to make good decisions on commit timing
 
+**Time Tracking Policy** (Effective December 11, 2025):
+- **ALL time spent must be documented in Linear**
+- Track time from start of user's request to task completion
+- Include: planning, implementation, troubleshooting, testing, deployment
+- Add time tracking comment to Linear issue when task is complete
+- Format: "**Time Spent**: X hours (breakdown: planning Xh, implementation Xh, fixes Xh)"
+- Be accurate - include all work including research, debugging, and iterations
+
 ### Branching Model
 
 ```
