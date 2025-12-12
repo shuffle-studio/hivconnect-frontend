@@ -60,7 +60,7 @@ These collections trigger automatic frontend rebuilds on create/update/delete:
 ```json
 {
   "vars": {
-    "DEPLOY_HOOK_URL": "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/c0df877f-ae43-4c2a-a086-865760a8e702"
+    "DEPLOY_HOOK_URL": "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/f17b431e-8331-4501-b55e-a89b94de228c"
   }
 }
 ```
@@ -195,7 +195,7 @@ Look for deployment within last 2-3 minutes.
 
 **Manually trigger rebuild**:
 ```bash
-curl -X POST "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/c0df877f-ae43-4c2a-a086-865760a8e702"
+curl -X POST "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/f17b431e-8331-4501-b55e-a89b94de228c"
 ```
 
 ### Changes Not Visible After Rebuild
