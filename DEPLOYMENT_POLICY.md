@@ -1,6 +1,6 @@
 # HIV Connect CNJ - Deployment Policy
 
-**Last Updated**: December 11, 2025
+**Last Updated**: December 12, 2025
 **Policy Owner**: Kevin (CTO)
 
 ---
@@ -60,10 +60,17 @@ These collections trigger automatic frontend rebuilds on create/update/delete:
 ```json
 {
   "vars": {
-    "DEPLOY_HOOK_URL": "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/f17b431e-8331-4501-b55e-a89b94de228c"
+    "DEPLOY_HOOK_URL": "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/2282d760-7d13-4023-bc61-9b85b707f129"
   }
 }
 ```
+
+**Deploy Hook Details**:
+- Hook ID: `2282d760-7d13-4023-bc61-9b85b707f129`
+- Branch: `main`
+- Created: December 12, 2025
+
+**Important**: Deploy hooks only work with Git-connected Cloudflare Pages projects. The frontend repository must be connected to GitHub for webhooks to trigger rebuilds.
 
 **Cooldown**: 10 seconds (batches rapid changes to avoid multiple rebuilds)
 
@@ -195,7 +202,7 @@ Look for deployment within last 2-3 minutes.
 
 **Manually trigger rebuild**:
 ```bash
-curl -X POST "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/f17b431e-8331-4501-b55e-a89b94de228c"
+curl -X POST "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/2282d760-7d13-4023-bc61-9b85b707f129"
 ```
 
 ### Changes Not Visible After Rebuild
