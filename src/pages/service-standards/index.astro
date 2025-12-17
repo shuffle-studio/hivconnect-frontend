@@ -1,0 +1,163 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Fetch service standards from Payload API
+const API_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://hivconnect-backend-production.shuffle-seo.workers.dev';
+
+let standards = [];
+let error = null;
+
+try {
+  const response = await fetch(`${API_URL}/api/service-standards?where[status][equals]=published&limit=100&sort=category,order`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch service standards: ${response.status}`);
+  }
+
+  const data = await response.json();
+  standards = data.docs || [];
+} catch (e: any) {
+  error = e.message;
+  console.error('Error fetching service standards:', e);
+}
+
+// Group standards by category
+const groupedStandards = standards.reduce((acc: any, standard: any) => {
+  const category = standard.category || 'other';
+  if (!acc[category]) {
+    acc[category] = [];
+  }
+  acc[category].push(standard);
+  return acc;
+}, {});
+
+// Category labels
+const categoryLabels: Record<string, string> = {
+  'core': 'Core Standards',
+  'service-delivery': 'Service Delivery',
+  'quality': 'Quality Management',
+  'medical': 'Medical Services',
+  'support': 'Support Services',
+  'prevention': 'Prevention Services',
+  'other': 'Other Standards',
+};
+---
+
+<BaseLayout
+  title="Service Standards"
+  description="Ryan White Service Standards and quality guidelines for HIV/AIDS services in Middlesex, Somerset, and Hunterdon counties"
+>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">
+        Service Standards
+      </h1>
+      <p class="text-lg text-gray-700 max-w-3xl">
+        View the Ryan White Service Standards and quality guidelines that govern HIV/AIDS care and support services
+        in Middlesex, Somerset, and Hunterdon counties.
+      </p>
+    </div>
+
+    {error && (
+      <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-8" role="alert">
+        <p class="font-semibold">Error Loading Service Standards</p>
+        <p class="text-sm">{error}</p>
+      </div>
+    )}
+
+    {!error && standards.length === 0 && (
+      <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-8" role="alert">
+        <p>No service standards available at this time.</p>
+      </div>
+    )}
+
+    {standards.length > 0 && (
+      <div class="space-y-8">
+        {Object.entries(groupedStandards).map(([category, categoryStandards]: [string, any]) => (
+          <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <!-- Category Header -->
+            <div class="bg-primary-600 px-6 py-4">
+              <h2 class="text-2xl font-semibold text-white">
+                {categoryLabels[category] || category}
+              </h2>
+            </div>
+
+            <!-- Standards List -->
+            <div class="divide-y divide-gray-200">
+              {categoryStandards.map((standard: any) => (
+                <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                  <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    <!-- Standard Info -->
+                    <div class="flex-1">
+                      <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                        {standard.title}
+                      </h3>
+
+                      {standard.description && (
+                        <p class="text-gray-700 mb-2">
+                          {standard.description}
+                        </p>
+                      )}
+
+                      {standard.lastUpdated && (
+                        <p class="text-sm text-gray-500">
+                          Last Updated: {new Date(standard.lastUpdated).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </p>
+                      )}
+                    </div>
+
+                    <!-- Download Button -->
+                    {standard.document && (
+                      <div class="flex flex-col sm:flex-row gap-2">
+                        <a
+                          href={standard.document.url}
+                          download
+                          class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white text-sm font-semibold rounded-lg hover:bg-primary-700 transition-colors whitespace-nowrap"
+                        >
+                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Download PDF
+                        </a>
+
+                        <a
+                          href={standard.document.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="inline-flex items-center justify-center px-4 py-2 bg-gray-600 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 transition-colors whitespace-nowrap"
+                        >
+                          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          View
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* Additional Info */}
+    <div class="mt-8 bg-gray-50 border border-gray-200 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-3">About Service Standards</h3>
+      <p class="text-gray-700 mb-4">
+        Service standards ensure consistent, high-quality HIV/AIDS care and support services across all providers in our region.
+        These standards are established in accordance with Ryan White Part A program requirements and best practices.
+      </p>
+      <p class="text-gray-700">
+        Service providers are expected to comply with these standards. For questions about service standards or compliance,
+        please <a href="/contact" class="text-primary-600 hover:text-primary-700 font-medium">contact us</a>.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,140 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Fetch bylaws from Payload API
+const API_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://hivconnect-backend-production.shuffle-seo.workers.dev';
+
+let bylaws = null;
+let error = null;
+
+try {
+  const response = await fetch(`${API_URL}/api/bylaws?where[status][equals]=published&where[isCurrent][equals]=true&limit=1`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch bylaws: ${response.status}`);
+  }
+
+  const data = await response.json();
+  bylaws = data.docs && data.docs.length > 0 ? data.docs[0] : null;
+} catch (e: any) {
+  error = e.message;
+  console.error('Error fetching bylaws:', e);
+}
+---
+
+<BaseLayout
+  title="Planning Council Bylaws"
+  description="View the current bylaws and organizational documents for the Middlesex-Somerset-Hunterdon HIV Health Services Planning Council"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">
+        Planning Council Bylaws
+      </h1>
+      <p class="text-lg text-gray-700">
+        View the current bylaws governing the Middlesex-Somerset-Hunterdon HIV Health Services Planning Council.
+      </p>
+    </div>
+
+    {error && (
+      <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-8" role="alert">
+        <p class="font-semibold">Error Loading Bylaws</p>
+        <p class="text-sm">{error}</p>
+      </div>
+    )}
+
+    {!error && !bylaws && (
+      <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-8" role="alert">
+        <p>No current bylaws document available.</p>
+      </div>
+    )}
+
+    {bylaws && (
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <!-- Document Info -->
+        <div class="bg-primary-50 px-6 py-4 border-b border-gray-200">
+          <h2 class="text-2xl font-semibold text-gray-900">{bylaws.title}</h2>
+          {bylaws.version && (
+            <p class="text-sm text-gray-600 mt-1">Version: {bylaws.version}</p>
+          )}
+          {bylaws.effectiveDate && (
+            <p class="text-sm text-gray-600">
+              Effective Date: {new Date(bylaws.effectiveDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </p>
+          )}
+        </div>
+
+        {/* Description */}
+        {bylaws.description && (
+          <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <p class="text-gray-700">{bylaws.description}</p>
+          </div>
+        )}
+
+        {/* PDF Viewer / Download */}
+        {bylaws.document && (
+          <div class="p-6">
+            {/* Download Button */}
+            <div class="flex flex-col sm:flex-row gap-4 mb-6">
+              <a
+                href={bylaws.document.url}
+                download
+                class="inline-flex items-center justify-center px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download PDF
+              </a>
+
+              <a
+                href={bylaws.document.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                Open in New Tab
+              </a>
+            </div>
+
+            {/* Embedded PDF Viewer (for desktop) */}
+            <div class="hidden md:block">
+              <iframe
+                src={bylaws.document.url}
+                class="w-full h-[800px] border border-gray-300 rounded-lg"
+                title="Bylaws PDF Viewer"
+              ></iframe>
+            </div>
+
+            {/* Mobile: Show download prompt */}
+            <div class="md:hidden bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg">
+              <p class="text-sm">
+                PDF viewing works best on desktop. Please use the download or open buttons above to view the document.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    )}
+
+    {/* Additional Info */}
+    <div class="mt-8 bg-gray-50 border border-gray-200 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-3">About the Bylaws</h3>
+      <p class="text-gray-700 mb-4">
+        The bylaws govern the structure, membership, and operations of the Middlesex-Somerset-Hunterdon HIV Health Services Planning Council.
+        These bylaws ensure transparency, accountability, and compliance with Ryan White Part A requirements.
+      </p>
+      <p class="text-gray-700">
+        For questions about the bylaws or Planning Council membership, please <a href="/contact" class="text-primary-600 hover:text-primary-700 font-medium">contact us</a>.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

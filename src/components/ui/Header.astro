@@ -5,6 +5,28 @@ import { t, getCurrentLanguage } from '../../i18n/astro-utils';
 
 // Get current language from Astro's built-in i18n system
 const currentLanguage = getCurrentLanguage(Astro.currentLocale);
+
+// Fetch navigation from SiteSettings
+const API_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://hivconnect-backend-production.shuffle-seo.workers.dev';
+
+let navigation = [];
+try {
+  const response = await fetch(`${API_URL}/api/globals/site-settings`);
+  if (response.ok) {
+    const data = await response.json();
+    navigation = data.navigation || [];
+    // Sort navigation by order
+    navigation.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+    // Sort children by order if they exist
+    navigation.forEach((item: any) => {
+      if (item.children && item.children.length > 0) {
+        item.children.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+      }
+    });
+  }
+} catch (e) {
+  console.error('Error fetching navigation:', e);
+}
 ---
 
 <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40" role="banner">
@@ -27,24 +49,54 @@ const currentLanguage = getCurrentLanguage(Astro.currentLocale);
       
       <!-- Desktop Navigation -->
       <nav id="main-navigation" class="hidden md:flex space-x-8" aria-label="Main navigation" role="navigation">
-        <a href="/find-services" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">
-          {t('navigation.findServices', currentLanguage)}
-        </a>
-        <a href="/get-tested" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">
-          {t('navigation.getTested', currentLanguage)}
-        </a>
-        <a href="/treatment-care" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">
-          {t('navigation.treatmentCare', currentLanguage)}
-        </a>
-        <a href="/support-resources" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">
-          Support
-        </a>
-        <a href="/resources" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">
-          Resources
-        </a>
-        <a href="/about" class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors">
-          {t('navigation.about', currentLanguage)}
-        </a>
+        {navigation.map((item: any) => {
+          const hasChildren = item.children && item.children.length > 0;
+
+          if (hasChildren) {
+            // Dropdown menu item
+            return (
+              <div class="relative dropdown-container" data-dropdown>
+                <button
+                  class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors flex items-center gap-1"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                >
+                  {item.label}
+                  <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div class="dropdown-menu absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden" role="menu">
+                  <div class="py-1">
+                    {item.children.map((child: any) => (
+                      <a
+                        href={child.url}
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary-600 transition-colors"
+                        target={child.openInNewTab ? '_blank' : undefined}
+                        rel={child.openInNewTab ? 'noopener noreferrer' : undefined}
+                        role="menuitem"
+                      >
+                        {child.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          } else {
+            // Regular link
+            return (
+              <a
+                href={item.url}
+                class="text-gray-700 hover:text-primary-600 px-3 py-2 text-sm font-medium transition-colors"
+                target={item.openInNewTab ? '_blank' : undefined}
+                rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
+              >
+                {item.label}
+              </a>
+            );
+          }
+        })}
       </nav>
       
       <!-- Emergency Contact & Language Toggle -->
@@ -67,24 +119,50 @@ const currentLanguage = getCurrentLanguage(Astro.currentLocale);
   <!-- Mobile Navigation Menu -->
   <div id="mobile-menu" class="md:hidden hidden bg-white border-t border-gray-200">
     <div class="px-2 pt-2 pb-3 space-y-1">
-      <a href="/find-services" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md">
-        {t('navigation.findServices', currentLanguage)}
-      </a>
-      <a href="/get-tested" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md">
-        {t('navigation.getTested', currentLanguage)}
-      </a>
-      <a href="/treatment-care" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md">
-        {t('navigation.treatmentCare', currentLanguage)}
-      </a>
-      <a href="/support-resources" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md">
-        Support
-      </a>
-      <a href="/resources" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md">
-        Resources
-      </a>
-      <a href="/about" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md">
-        {t('navigation.about', currentLanguage)}
-      </a>
+      {navigation.map((item: any, index: number) => {
+        const hasChildren = item.children && item.children.length > 0;
+
+        if (hasChildren) {
+          // Accordion menu item for mobile
+          return (
+            <div class="mobile-accordion" data-mobile-accordion>
+              <button
+                class="w-full flex items-center justify-between px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
+                aria-expanded="false"
+              >
+                {item.label}
+                <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div class="mobile-accordion-content hidden pl-4">
+                {item.children.map((child: any) => (
+                  <a
+                    href={child.url}
+                    class="block px-3 py-2 text-sm text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-md"
+                    target={child.openInNewTab ? '_blank' : undefined}
+                    rel={child.openInNewTab ? 'noopener noreferrer' : undefined}
+                  >
+                    {child.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          );
+        } else if (item.url) {
+          // Regular link for mobile
+          return (
+            <a
+              href={item.url}
+              class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-50 rounded-md"
+              target={item.openInNewTab ? '_blank' : undefined}
+              rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
+            >
+              {item.label}
+            </a>
+          );
+        }
+      })}
     </div>
   </div>
 </header>
@@ -93,7 +171,7 @@ const currentLanguage = getCurrentLanguage(Astro.currentLocale);
   // Mobile menu toggle
   const mobileMenuButton = document.getElementById('mobile-menu-button');
   const mobileMenu = document.getElementById('mobile-menu');
-  
+
   mobileMenuButton?.addEventListener('click', () => {
     const isHidden = mobileMenu?.classList.contains('hidden');
     if (isHidden) {
@@ -104,13 +182,129 @@ const currentLanguage = getCurrentLanguage(Astro.currentLocale);
       mobileMenuButton?.setAttribute('aria-expanded', 'false');
     }
   });
-  
+
   // Close mobile menu when clicking outside
   document.addEventListener('click', (event) => {
     const target = event.target as Element;
     if (!mobileMenuButton?.contains(target) && !mobileMenu?.contains(target)) {
       mobileMenu?.classList.add('hidden');
       mobileMenuButton?.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Desktop dropdown functionality
+  const dropdownContainers = document.querySelectorAll('[data-dropdown]');
+
+  dropdownContainers.forEach(container => {
+    const button = container.querySelector('button');
+    const menu = container.querySelector('.dropdown-menu');
+    const chevron = button?.querySelector('svg');
+    let isOpen = false;
+
+    // Toggle dropdown on button click
+    button?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isOpen = !isOpen;
+
+      if (isOpen) {
+        menu?.classList.remove('hidden');
+        button?.setAttribute('aria-expanded', 'true');
+        chevron?.classList.add('rotate-180');
+      } else {
+        menu?.classList.add('hidden');
+        button?.setAttribute('aria-expanded', 'false');
+        chevron?.classList.remove('rotate-180');
+      }
+
+      // Close other dropdowns
+      dropdownContainers.forEach(otherContainer => {
+        if (otherContainer !== container) {
+          const otherMenu = otherContainer.querySelector('.dropdown-menu');
+          const otherButton = otherContainer.querySelector('button');
+          const otherChevron = otherButton?.querySelector('svg');
+          otherMenu?.classList.add('hidden');
+          otherButton?.setAttribute('aria-expanded', 'false');
+          otherChevron?.classList.remove('rotate-180');
+        }
+      });
+    });
+
+    // Hover to open (desktop only)
+    container.addEventListener('mouseenter', () => {
+      if (window.innerWidth >= 768) {
+        menu?.classList.remove('hidden');
+        button?.setAttribute('aria-expanded', 'true');
+        chevron?.classList.add('rotate-180');
+        isOpen = true;
+      }
+    });
+
+    container.addEventListener('mouseleave', () => {
+      if (window.innerWidth >= 768) {
+        menu?.classList.add('hidden');
+        button?.setAttribute('aria-expanded', 'false');
+        chevron?.classList.remove('rotate-180');
+        isOpen = false;
+      }
+    });
+
+    // Keyboard navigation
+    button?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        button.click();
+      } else if (e.key === 'Escape') {
+        menu?.classList.add('hidden');
+        button?.setAttribute('aria-expanded', 'false');
+        chevron?.classList.remove('rotate-180');
+        isOpen = false;
+      }
+    });
+  });
+
+  // Mobile accordion functionality
+  const mobileAccordions = document.querySelectorAll('[data-mobile-accordion]');
+
+  mobileAccordions.forEach(accordion => {
+    const button = accordion.querySelector('button');
+    const content = accordion.querySelector('.mobile-accordion-content');
+    const chevron = button?.querySelector('svg');
+
+    button?.addEventListener('click', () => {
+      const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+      if (isExpanded) {
+        content?.classList.add('hidden');
+        button.setAttribute('aria-expanded', 'false');
+        chevron?.classList.remove('rotate-180');
+      } else {
+        content?.classList.remove('hidden');
+        button.setAttribute('aria-expanded', 'true');
+        chevron?.classList.add('rotate-180');
+      }
+    });
+  });
+
+  // Close all dropdowns when clicking outside
+  document.addEventListener('click', (event) => {
+    const target = event.target as Element;
+    let clickedInsideDropdown = false;
+
+    dropdownContainers.forEach(container => {
+      if (container.contains(target)) {
+        clickedInsideDropdown = true;
+      }
+    });
+
+    if (!clickedInsideDropdown) {
+      dropdownContainers.forEach(container => {
+        const menu = container.querySelector('.dropdown-menu');
+        const button = container.querySelector('button');
+        const chevron = button?.querySelector('svg');
+        menu?.classList.add('hidden');
+        button?.setAttribute('aria-expanded', 'false');
+        chevron?.classList.remove('rotate-180');
+      });
     }
   });
 </script>
