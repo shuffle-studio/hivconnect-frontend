@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/ui/Header.astro';
+import Footer from '../../components/ui/Footer.astro';
 import { fetchUpcomingEvents, fetchPastEvents, extractTextFromLexical } from '../../lib/api';
 import type { Event } from '../../lib/api';
 
@@ -75,6 +77,8 @@ function getCategoryLabel(category: string): string {
 ---
 
 <BaseLayout title={title} description={description}>
+  <Header />
+  <main>
   <div class="min-h-screen bg-gray-50 py-12">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Header -->
@@ -217,4 +221,6 @@ function getCategoryLabel(category: string): string {
       )}
     </div>
   </div>
+  </main>
+  <Footer />
 </BaseLayout>

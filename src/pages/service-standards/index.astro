@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/ui/Header.astro';
+import Footer from '../../components/ui/Footer.astro';
 
 // Fetch service standards from Payload API
 const API_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://hivconnect-backend-production.shuffle-seo.workers.dev';
@@ -47,6 +49,8 @@ const categoryLabels: Record<string, string> = {
   title="Service Standards"
   description="Ryan White Service Standards and quality guidelines for HIV/AIDS services in Middlesex, Somerset, and Hunterdon counties"
 >
+  <Header />
+  <main>
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <!-- Header -->
     <div class="mb-8">
@@ -160,4 +164,6 @@ const categoryLabels: Record<string, string> = {
       </p>
     </div>
   </div>
+  </main>
+  <Footer />
 </BaseLayout>
