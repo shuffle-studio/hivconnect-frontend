@@ -1,8 +1,8 @@
 # HIV Connect Central NJ - Project Context & Implementation Guide
 
-**Last Updated**: December 9, 2025
-**Project Repository (Frontend)**: https://github.com/ShuffleSEO/hivconnect-frontend
-**Project Repository (Backend)**: https://github.com/ShuffleSEO/hivconnect-backend
+**Last Updated**: February 18, 2026
+**Project Repository (Frontend)**: https://github.com/shuffle-studio/hivconnect-frontend
+**Project Repository (Backend)**: https://github.com/shuffle-studio/hivconnect-backend (local: `~/Desktop/ShuffleSEO/mshtga-backend`)
 **Linear Project**: https://linear.app/shuffle-studio/project/active-client-delivery-q4-2025
 **Prepared for**: Kevin / Shuffle SEO CTO
 **Purpose**: Complete context document for AI assistants and developers
@@ -13,9 +13,10 @@
 
 **IMPORTANT**: This project uses Linear for all active work tracking, task management, and progress updates.
 
-- **Linear Project**: Active Client Delivery - Q4 2025
+- **Linear Project**: [HIV Connect Central NJ (2021-Present)](https://linear.app/shuffle-studio/project/hiv-connect-central-nj-2021-present) (`c55a46a8-1aee-45a2-919f-71bf525e8b73`)
 - **Parent Issue**: [SHU-9 - Client Testing Follow-up & Support](https://linear.app/shuffle-studio/issue/SHU-9)
 - **Team**: Shuffle Studio (`9fe49653-ca9a-4541-8eee-3b2ecbcaff5f`)
+- **Current Cycle**: `efc108b3-37c9-4a40-993f-00aad0fbe8a9`
 
 **Markdown Files (Documentation Only)**:
 - `CLAUDE.md` - This file: Complete project context and technical documentation
@@ -56,6 +57,55 @@ See [Linear Integration & Workflow](#linear-integration--workflow) section below
 
 ---
 
+## Infrastructure & Access Reference
+
+### Cloudflare Account
+- **Account**: Shuffle Studio
+- **Account ID**: `77936f7f1fecd5df8504adaf96fad1fb`
+- **Auth**: Wrangler OAuth as `kevin@shufflestudio.io` (run `npx wrangler whoami` to verify)
+
+### Frontend (Cloudflare Pages)
+- **Project Name**: `hivconnect-frontend`
+- **Domain**: `hivconnect-frontend.pages.dev` → `hivconnectcnj.org`
+- **Git Repo**: `shuffle-studio/hivconnect-frontend` (auto-deploys on push to `main`)
+- **Local Path**: `~/Desktop/ShuffleSEO/mshtga`
+- **Trigger rebuild**: Push to `main` or empty commit `git commit --allow-empty -m "trigger rebuild"`
+
+### Backend (Cloudflare Workers)
+- **Worker**: `hivconnect-backend-production`
+- **URL**: `hivconnect-backend-production.shuffle-seo.workers.dev`
+- **Admin**: `hivconnect-backend-production.shuffle-seo.workers.dev/admin`
+- **Local Path**: `~/Desktop/ShuffleSEO/mshtga-backend`
+- **Config**: `mshtga-backend/wrangler.toml` (contains D1/R2 bindings)
+
+### Database (Cloudflare D1)
+- **Name**: `hivconnect-db-production`
+- **ID**: `4dc8866a-3444-46b8-b73a-4def21b45772`
+- **Direct SQL access**:
+  ```bash
+  cd ~/Desktop/ShuffleSEO/mshtga-backend
+  npx wrangler d1 execute hivconnect-db-production --env production --remote --command "YOUR SQL HERE"
+  ```
+- **SQL file execution**:
+  ```bash
+  npx wrangler d1 execute hivconnect-db-production --env production --remote --file path/to/file.sql
+  ```
+- **Key tables**: `providers` (19 rows), `providers_services_medical`, `providers_services_support`, `providers_services_prevention`, `providers_languages`, `providers_accessibility`, `providers_eligibility`, `providers_insurance`, `providers_ryan_white_parts`, `blog`, `faqs`, `resources`, `events`, `pages`, `media`, `users`
+- **Related table pattern**: Array fields use child tables with `_order` (INTEGER), `_parent_id` (INTEGER FK), `id` (TEXT, 24-char hex), and a value column (e.g., `service`, `language`, `feature`, `plan`, `requirement`). Exception: `providers_ryan_white_parts` uses `order`, `parent_id`, `value`, `id` (INTEGER PK).
+
+### API (PayloadCMS REST)
+- **Base URL**: `PUBLIC_PAYLOAD_URL` env var (set in Cloudflare Pages environment)
+- **Public endpoints** (no auth): `GET /api/providers`, `GET /api/blog`, `GET /api/resources`, etc.
+- **Admin endpoints**: Require JWT auth via PayloadCMS admin login
+- **Frontend fetches**: See `src/lib/api.ts` — `fetchProviders()`, `fetchFAQs()`, etc.
+
+### Linear
+- **Team**: Shuffle Studio (`9fe49653-ca9a-4541-8eee-3b2ecbcaff5f`)
+- **Project**: HIV Connect Central NJ (`c55a46a8-1aee-45a2-919f-71bf525e8b73`)
+- **MCP tools available**: `mcp__plugin_linear_linear__*` (list_issues, create_comment, update_issue, etc.)
+
+---
+
 ## Table of Contents
 
 1. [Deployment Policy - Production Only](#-deployment-policy---production-only)
@@ -92,38 +142,62 @@ HIV Connect Central NJ is a comprehensive web platform for the Middlesex-Somerse
 - **CEO**: José / Shuffle SEO
 - **End Users**: People living with HIV/AIDS, caregivers, service providers, community members
 
-### Current State (as of Dec 9, 2025)
+### Current State (as of Feb 18, 2026)
 
 **✅ PRODUCTION DEPLOYED**:
-- **Backend**: PayloadCMS 3.65.0 on Cloudflare Workers ([hivconnect-backend.shuffle-seo.workers.dev](https://hivconnect-backend.shuffle-seo.workers.dev/admin))
-- **Frontend**: Astro 5 on Cloudflare Pages ([hivconnectcnj.org](https://hivconnectcnj.org))
-- **Database**: Cloudflare D1 (SQLite)
+- **Backend**: PayloadCMS on Cloudflare Workers (`hivconnect-backend-production.shuffle-seo.workers.dev`)
+- **Frontend**: Astro 5 on Cloudflare Pages (`hivconnect-frontend.pages.dev` → `hivconnectcnj.org`)
+- **Database**: Cloudflare D1 — `hivconnect-db-production` (ID: `4dc8866a-3444-46b8-b73a-4def21b45772`)
 - **Storage**: Cloudflare R2 (PDFs and media)
-- **Auto-Rebuild**: Frontend rebuilds in 2-3 minutes when CMS content changes
+- **Cloudflare Account**: Shuffle Studio (`77936f7f1fecd5df8504adaf96fad1fb`)
+- **Auto-Rebuild**: Frontend rebuilds in 2-3 minutes when CMS content changes OR on git push to `main`
 
-**Collections (8 Active)**:
-- ✅ Providers (17 active providers)
+**Collections (8 Active + 3 Scaffold)**:
+- ✅ Providers (19 active providers — including RWJ Dental added Feb 18)
 - ✅ Resources (with internal PDF / external link support)
 - ✅ Blog (for news and updates)
 - ✅ PDF Library (versioned documents)
-- ✅ FAQs (6 categories) - *Added Dec 9*
-- ✅ Pages (custom content pages) - *Added Dec 9*
+- ✅ FAQs (6 categories)
+- ✅ Pages (custom content pages)
 - ✅ Tags (shared across collections)
 - ✅ Media (R2 uploads)
+- 📦 Events (scaffold — collection exists, data populated)
+- 📦 Bylaws (scaffold — collection exists, needs data)
+- 📦 Service Standards (scaffold — collection exists, needs data)
 
 **Globals (1)**:
-- ✅ Site Settings (hotline, logo, footer links, etc.)
+- ✅ Site Settings (hotline, logo, footer links, navigation)
 
 **Frontend Pages (20+ pages)**:
-- ✅ All original 17 pages
-- ✅ /faq - FAQ page with accordion UI - *Added Dec 9*
-- ✅ /resources - External resources page - *Added Dec 9*
-- ✅ /[slug] - Dynamic custom pages route - *Added Dec 9*
+- ✅ All original 17 pages + FAQ, Resources, dynamic [slug], Events, Bylaws, Service Standards
+- ✅ Provider detail pages with Ryan White template, walk-in/appointment badges
+- ✅ Visual redesign: teal/coral palette (SHU-574), warm stone backgrounds, Source Serif 4 headings
 
-**Current Focus (Linear SHU-9)**:
-- ✅ 4/8 sub-issues complete (50% progress)
-- ⏸️ 2/8 blocked (Events/Calendar decision, Membership Application clarification)
-- 📅 2/8 deferred to 2026 (Full Events System, Site Search)
+**Design System (updated Feb 18, 2026)**:
+- **Primary**: Teal (`#0F766E` at -700) — replaces red
+- **Secondary**: Coral/Orange (`#C2410C` at -700)
+- **Accent**: Gold scale
+- **Neutrals**: Stone-50 for section backgrounds (replaces gray-50)
+- **Error/Crisis**: Still red (`bg-error-600`) — crisis banner, emergency buttons, hotline
+- **Headings**: Source Serif 4 (serif display font)
+
+**Sprint Status (Feb 18, 2026 — Production Launch Sprint COMPLETE)**:
+- ✅ SHU-519: Broken appointment buttons → contact popups
+- ✅ SHU-523: Missing headers on 4 pages
+- ✅ SHU-526: Homepage contact button centering
+- ✅ SHU-524: RWJ Dental separated (static + D1 database)
+- ✅ SHU-525: Walk-in vs appointment icons
+- ✅ SHU-520: Ryan White info template
+- ✅ SHU-574: Full visual redesign (red → teal/coral)
+- ✅ Lexical rich text fix for FAQ, [slug], resources pages
+
+**Remaining Backlog (not blocking launch)**:
+- SHU-522: Update provider services data (content work)
+- SHU-527: Verify & update events section
+- SHU-528: Populate Bylaws/Service Standards in CMS
+- SHU-226: Spanish language toggle (large)
+- SHU-228: Lighthouse performance & accessibility
+- SHU-209: Site search (Pagefind)
 
 ### Target Architecture (2026 Stack)
 - **Frontend**: Astro 5 (SSG/hybrid) → Cloudflare Pages
@@ -2411,39 +2485,38 @@ The following goals provide context, but **Linear is the single source of truth*
 
 This section provides a quick overview of the project's current state and recent progress. **For detailed task tracking, always check Linear first** (https://linear.app/shuffle-studio/issue/SHU-9).
 
-### Last Session: December 9, 2025
+### Last Session: February 18, 2026
 
-**Completed (All Quick Wins - 4/8 SHU-9 Sub-Issues)**:
-- ✅ SHU-203: FAQ Collection + Page (2-3 hours)
-- ✅ SHU-205: Navigation Restructure (1-2 hours)
-- ✅ SHU-206: External Resources Page (1-2 hours)
-- ✅ SHU-204: Pages Collection (3-4 hours)
-- ✅ Transitioned all project tracking to Linear
-- ✅ Updated CLAUDE.md with Linear integration details
+**Production Launch Sprint — ALL COMPLETE**:
+- ✅ SHU-519/523/526: Linear housekeeping (marked Done, already shipped in `df81b9e`)
+- ✅ SHU-524: RWJ Dental as separate provider — added to `providers.ts` AND PayloadCMS D1 via wrangler SQL
+- ✅ SHU-525: Walk-in/appointment badges on ProviderCard + [id].astro
+- ✅ SHU-520: Ryan White info template on provider detail pages
+- ✅ Lexical rich text fix (`renderLexicalToHTML`) for FAQ, [slug], resources pages
+- ✅ SHU-574: Full 26-file visual redesign (red → teal/coral, gray → stone, hero overlays lightened)
 
-**Deployments**:
-- ✅ Backend: PayloadCMS on Cloudflare Workers (production)
-- ✅ Frontend: Astro on Cloudflare Pages (production)
-- ✅ 8 collections active: Providers, Resources, Blog, PDFLibrary, FAQs, Pages, Tags, Media
-- ✅ Auto-rebuild system working (2-3 min on content changes)
+**Key Commits**:
+- `2bec20b` — Main sprint commit (26 files: all features + full redesign)
+- `f780f96` — Empty commit to trigger Cloudflare Pages rebuild for D1 data
 
-**Current Status (50% Complete)**:
-- Linear SHU-9: 4/8 sub-issues done
-- All in-scope quick wins delivered
-- 2 sub-issues blocked (Events/Calendar, Membership Application)
-- 2 sub-issues deferred to 2026 (Full Events, Site Search)
+**Infrastructure Connections Verified**:
+- Wrangler authenticated as `kevin@shufflestudio.io` (OAuth token)
+- Cloudflare account: Shuffle Studio (`77936f7f1fecd5df8504adaf96fad1fb`)
+- D1 database: `hivconnect-db-production` (`4dc8866a-3444-46b8-b73a-4def21b45772`)
+- Can execute SQL directly via: `cd mshtga-backend && npx wrangler d1 execute hivconnect-db-production --env production --remote --command "SQL_HERE"`
+- Pages project: `hivconnect-frontend` (auto-deploys on push to `main`)
+- Backend repo: `~/Desktop/ShuffleSEO/mshtga-backend` (contains `wrangler.toml` with D1/R2 bindings)
 
-**Current Blockers**:
-- 🔴 **SHU-202 (Events/Calendar)**: Blocking launch - client requirement, needs José + Kevin decision
-- 🟡 **SHU-207 (Membership Application)**: Needs José to clarify requirements with Terri
-
-**Next Tasks** (see Linear for details):
-- Option A: Address blockers (José + Kevin discuss Events, José clarify Membership)
-- Option B: Content population (add FAQs, resources, sample pages)
-- Option C: Production readiness (rich text renderer, final QA)
+**Remaining Backlog** (see Linear for details):
+- SHU-522: Update provider services data (content work for Terri)
+- SHU-527: Verify & update events section
+- SHU-528: Populate Bylaws/Service Standards collections in CMS
+- SHU-226: Spanish language toggle (large scope)
+- SHU-228: Lighthouse performance & accessibility
+- SHU-209: Site search (Pagefind)
 
 **Where to Find Active Work**:
-- **Linear**: https://linear.app/shuffle-studio/issue/SHU-9 (Single source of truth)
+- **Linear**: https://linear.app/shuffle-studio/project/hiv-connect-central-nj-2021-present (Single source of truth)
 - **Git Commits**: Reference `[SHU-XXX]` in commit messages
 - **This File**: Documentation and context only (not for active tracking)
 
@@ -2494,11 +2567,23 @@ This section provides a quick overview of the project's current state and recent
 - Defined all collections and their structures
 - Documented technical decisions and environment setup
 
+### February 18, 2026
+- **Production Launch Sprint completed** — all 6 plan steps done
+- Visual redesign: red → teal/coral across 26 files (SHU-574)
+- RWJ Dental added as provider #19 (static data + PayloadCMS D1 direct insert)
+- Walk-in/appointment badges added to provider cards and detail pages (SHU-525)
+- Ryan White info template on provider detail pages (SHU-520)
+- Lexical rich text renderer (`renderLexicalToHTML`) wired into FAQ, [slug], resources
+- Wrangler D1 access verified and documented (can INSERT/SELECT production database)
+- Updated Session Continuity, Current State, and infrastructure details in CLAUDE.md
+- All sprint Linear issues marked Done (SHU-519/520/523/524/525/526/574)
+
 ### [Future Updates]
-- Update after each major phase completion
-- Document new features added
-- Update blockers and next steps
-- Track progress against original plan
+- Populate Bylaws/Service Standards collections (SHU-528)
+- Provider services data audit (SHU-522)
+- Lighthouse performance pass (SHU-228)
+- Spanish language implementation (SHU-226)
+- Site search with Pagefind (SHU-209)
 
 ---
 
