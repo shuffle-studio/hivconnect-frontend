@@ -44,8 +44,8 @@ const ProviderSearch: React.FC<Props> = ({ providers }) => {
         const hasRequiredServices = filters.services.every(service => {
           // Check if provider offers this service
           return Object.values(provider.services).some(category =>
-            Object.entries(category).some(([key, value]) => 
-              key.includes(service.toLowerCase()) && value === true
+            Object.entries(category).some(([key, value]) =>
+              key.includes(service.toLowerCase().replace(/\s+/g, '_')) && value === true
             )
           );
         });

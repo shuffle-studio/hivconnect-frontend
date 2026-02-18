@@ -160,9 +160,9 @@ const ProviderMap: React.FC<Props> = ({ providers, filteredProviders }) => {
                   <div className="p-2 min-w-[200px]">
                     <h4 className="font-semibold text-gray-900 mb-2">{provider.name}</h4>
                     <div className="text-sm text-gray-600 space-y-1 mb-3">
-                      <p><strong>Address:</strong> {location.address}</p>
-                      <p><strong>Phone:</strong> {location.phone}</p>
-                      <p><strong>Hours:</strong> {location.hours}</p>
+                      <p><strong>Address:</strong> {location.address}, {location.city}</p>
+                      <p><strong>Phone:</strong> {provider.contact.phone}</p>
+                      <p><strong>Hours:</strong> Call for hours</p>
                     </div>
                     
                     {/* Services offered */}
