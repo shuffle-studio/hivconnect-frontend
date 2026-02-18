@@ -149,6 +149,27 @@ function formatHours(hours: any) {
     </div>
   </div>
 
+  <!-- Walk-in / Appointment Badge -->
+  {provider.walk_in_accepted !== undefined && (
+    <div class="mb-4">
+      {provider.walk_in_accepted ? (
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-success-50 text-success-700 border border-success-200">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          Walk-ins Welcome
+        </span>
+      ) : (
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-secondary-50 text-secondary-700 border border-secondary-200">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Appointment Required
+        </span>
+      )}
+    </div>
+  )}
+
   <!-- Key Services -->
   <div class="mb-4">
     <h4 class="text-sm font-medium text-gray-900 mb-2">Key Services Available:</h4>

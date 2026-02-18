@@ -41,6 +41,95 @@ export function extractTextFromLexical(lexicalData: any): string {
   return text.trim();
 }
 
+// Render Lexical rich text format to HTML string
+export function renderLexicalToHTML(lexicalData: any): string {
+  if (!lexicalData) return '';
+
+  // If it's already a plain string, return it wrapped in a paragraph
+  if (typeof lexicalData === 'string') {
+    return `<p>${lexicalData}</p>`;
+  }
+
+  if (!lexicalData.root || !lexicalData.root.children) {
+    return '';
+  }
+
+  const escapeHTML = (str: string): string =>
+    str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+
+  const renderTextNode = (node: any): string => {
+    let text = escapeHTML(node.text || '');
+    if (node.format) {
+      if (node.format & 1) text = `<strong>${text}</strong>`;
+      if (node.format & 2) text = `<em>${text}</em>`;
+      if (node.format & 8) text = `<u>${text}</u>`;
+      if (node.format & 4) text = `<s>${text}</s>`;
+      if (node.format & 16) text = `<code>${text}</code>`;
+    }
+    return text;
+  };
+
+  const renderNode = (node: any): string => {
+    if (!node) return '';
+
+    switch (node.type) {
+      case 'text':
+        return renderTextNode(node);
+
+      case 'link': {
+        const href = node.fields?.url || node.url || '#';
+        const children = (node.children || []).map(renderNode).join('');
+        return `<a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer">${children}</a>`;
+      }
+
+      case 'paragraph': {
+        const children = (node.children || []).map(renderNode).join('');
+        return children ? `<p>${children}</p>` : '';
+      }
+
+      case 'heading': {
+        const tag = node.tag || 'h2';
+        const children = (node.children || []).map(renderNode).join('');
+        return `<${tag}>${children}</${tag}>`;
+      }
+
+      case 'list': {
+        const tag = node.listType === 'number' ? 'ol' : 'ul';
+        const children = (node.children || []).map(renderNode).join('');
+        return `<${tag}>${children}</${tag}>`;
+      }
+
+      case 'listitem': {
+        const children = (node.children || []).map(renderNode).join('');
+        return `<li>${children}</li>`;
+      }
+
+      case 'quote': {
+        const children = (node.children || []).map(renderNode).join('');
+        return `<blockquote>${children}</blockquote>`;
+      }
+
+      case 'horizontalrule':
+        return '<hr />';
+
+      case 'linebreak':
+        return '<br />';
+
+      default:
+        if (node.children && Array.isArray(node.children)) {
+          return node.children.map(renderNode).join('');
+        }
+        return '';
+    }
+  };
+
+  return lexicalData.root.children.map(renderNode).join('');
+}
+
 interface FAQResponse {
   docs: FAQ[];
   totalDocs: number;
@@ -157,6 +246,7 @@ interface PayloadProvider {
   eligibility: Array<{ id: string; requirement: string }>;
   ryanWhite: boolean;
   ryanWhiteParts: string[];
+  walkInAccepted?: boolean;
   languages: Array<{ id: string; language: string }>;
   accessibility: Array<{ id: string; feature: string }>;
   insurance: Array<{ id: string; plan: string }>;
@@ -287,6 +377,7 @@ function transformProvider(payloadProvider: PayloadProvider): Provider {
     last_updated: new Date().toISOString(), // Using current date since backend tracks this differently
     description: payloadProvider.description,
     featured: payloadProvider.ryanWhite && payloadProvider.ryanWhiteParts.includes('A'),
+    walk_in_accepted: payloadProvider.walkInAccepted,
   };
 }
 

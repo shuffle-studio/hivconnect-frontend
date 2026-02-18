@@ -76,6 +76,13 @@ export interface Provider {
   last_updated: string;
   description?: string;
   featured?: boolean;
+  walk_in_accepted?: boolean; // true = walk-ins welcome, false = appointment required, undefined = unknown
+  ryan_white_contact?: {       // Optional: specific RW program contact at this provider
+    name?: string;
+    phone?: string;
+    email?: string;
+    notes?: string;
+  };
 }
 
 export interface SearchFilters {

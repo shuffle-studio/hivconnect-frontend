@@ -52,8 +52,8 @@ const ProviderMap: React.FC<Props> = ({ providers, filteredProviders }) => {
 
           // Determine service type and marker color
           const getMarkerColor = (provider: Provider) => {
-            if (provider.services.medical_care.hiv_treatment) return '#dc2626'; // Red for treatment
-            if (provider.services.medical_care.hiv_testing) return '#2563eb'; // Blue for testing
+            if (provider.services.medical_care.hiv_treatment) return '#0D9488'; // Teal for treatment
+            if (provider.services.prevention.hiv_testing) return '#EA580C'; // Coral/orange for testing
             if (provider.services.support_services.case_management) return '#16a34a'; // Green for support
             return '#6b7280'; // Gray for general services
           };
@@ -84,11 +84,11 @@ const ProviderMap: React.FC<Props> = ({ providers, filteredProviders }) => {
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Provider Locations</h3>
           <div className="flex flex-wrap gap-4 text-sm">
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 rounded-full bg-red-600"></div>
+              <div className="w-3 h-3 rounded-full bg-teal-600"></div>
               <span className="text-gray-700">HIV Treatment</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+              <div className="w-3 h-3 rounded-full bg-orange-600"></div>
               <span className="text-gray-700">HIV Testing</span>
             </div>
             <div className="flex items-center space-x-2">
@@ -170,7 +170,7 @@ const ProviderMap: React.FC<Props> = ({ providers, filteredProviders }) => {
                       <p className="font-medium text-gray-900 mb-1">Services:</p>
                       <div className="flex flex-wrap gap-1">
                         {provider.services.medical_care.hiv_treatment && (
-                          <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">HIV Treatment</span>
+                          <span className="px-2 py-1 bg-teal-100 text-teal-800 rounded text-xs">HIV Treatment</span>
                         )}
                         {provider.services.medical_care.hiv_testing && (
                           <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">HIV Testing</span>

@@ -72,6 +72,72 @@ export const providers: Provider[] = [
     featured: true
   },
   {
+    id: 'rwj-dental-program',
+    name: 'Robert Wood Johnson University Hospital - Dental Program',
+    type: 'Hospital',
+    ryan_white_parts: ['A', 'B'],
+    contact: {
+      phone: '(732) 937-8653',
+      fax: '(973) 635-9422',
+      website: 'https://www.rwjbh.org/for-health-care-professionals/medical-education/robert-wood-johnson-university-hospital/dental-residency/dental-facilities-at-rwjuh/'
+    },
+    locations: [
+      {
+        id: 'rwj-dental-main',
+        address: 'One Robert Wood Johnson Place, DentalSuite B',
+        city: 'New Brunswick',
+        county: 'middlesex',
+        zip_code: '08901',
+        coordinates: { lat: 40.4897, lng: -74.4480 },
+        accessibility: ['wheelchair', 'parking'],
+        hours: {
+          monday: { open: '09:00', close: '17:00' },
+          tuesday: { open: '09:00', close: '17:00' },
+          wednesday: { open: '09:00', close: '17:00' },
+          thursday: { open: '09:00', close: '17:00' },
+          friday: { open: '09:00', close: '17:00' },
+          saturday: null,
+          sunday: null
+        }
+      }
+    ],
+    services: {
+      medical_care: {
+        hiv_treatment: false,
+        prep_services: false,
+        std_testing: false,
+        specialty_care: [],
+        dental_care: true,
+        mental_health_medical: false
+      },
+      support_services: {
+        case_management: false,
+        mental_health: false,
+        substance_abuse: false,
+        housing_assistance: false,
+        transportation: false,
+        food_nutrition: false,
+        legal_services: false,
+        insurance_help: false
+      },
+      prevention: {
+        hiv_testing: false,
+        counseling: false,
+        prep_counseling: false,
+        education: false,
+        risk_reduction: false
+      }
+    },
+    eligibility: {
+      insurance_accepted: ['medicaid', 'medicare', 'private'],
+      special_populations: ['hiv_positive']
+    },
+    languages: ['english'],
+    last_updated: '2026-02-18T00:00:00Z',
+    walk_in_accepted: false,
+    description: 'Specialized dental care for HIV-positive patients at Robert Wood Johnson University Hospital. By appointment only.'
+  },
+  {
     id: 'rwj-aids-program',
     name: 'Rutgers Robert Wood Johnson AIDS Program',
     type: 'Hospital',
@@ -458,6 +524,7 @@ export const providers: Provider[] = [
     },
     languages: ['english', 'spanish'],
     last_updated: '2025-01-15T10:00:00Z',
+    walk_in_accepted: false,
     description: 'Hospital-based HIV care with medical case management and comprehensive services.'
   },
   {
@@ -974,6 +1041,7 @@ export const providers: Provider[] = [
     },
     languages: ['english', 'spanish'],
     last_updated: '2025-01-15T10:00:00Z',
+    walk_in_accepted: true,
     description: 'Convenient HIV testing at multiple pharmacy locations with walk-in availability.'
   },
   {
@@ -1038,6 +1106,7 @@ export const providers: Provider[] = [
     },
     languages: ['english', 'spanish'],
     last_updated: '2025-01-15T10:00:00Z',
+    walk_in_accepted: false,
     description: 'Comprehensive sexual and reproductive health services including HIV testing and PrEP.'
   },
   {
