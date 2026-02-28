@@ -1,6 +1,6 @@
 # HIV Connect Central NJ - Project Context & Implementation Guide
 
-**Last Updated**: February 18, 2026
+**Last Updated**: February 27, 2026
 **Project Repository (Frontend)**: https://github.com/shuffle-studio/hivconnect-frontend
 **Project Repository (Backend)**: https://github.com/shuffle-studio/hivconnect-backend (local: `~/Desktop/ShuffleSEO/mshtga-backend`)
 **Linear Project**: https://linear.app/shuffle-studio/project/active-client-delivery-q4-2025
@@ -76,7 +76,9 @@ See [Linear Integration & Workflow](#linear-integration--workflow) section below
 - **URL**: `hivconnect-backend-production.shuffle-seo.workers.dev`
 - **Admin**: `hivconnect-backend-production.shuffle-seo.workers.dev/admin`
 - **Local Path**: `~/Desktop/ShuffleSEO/mshtga-backend`
-- **Config**: `mshtga-backend/wrangler.toml` (contains D1/R2 bindings)
+- **Config**: `mshtga-backend/wrangler.jsonc` (contains D1/R2 bindings)
+- **Stack**: Next.js 15 + PayloadCMS 3 + Lexical rich text (deployed via OpenNext for Cloudflare)
+- **GitHub**: `shuffle-studio/hivconnect-backend` (canonical; `kevinshuffle/hivconnect-backend` redirects here)
 
 ### Database (Cloudflare D1)
 - **Name**: `hivconnect-db-production`
@@ -84,11 +86,11 @@ See [Linear Integration & Workflow](#linear-integration--workflow) section below
 - **Direct SQL access**:
   ```bash
   cd ~/Desktop/ShuffleSEO/mshtga-backend
-  npx wrangler d1 execute hivconnect-db-production --env production --remote --command "YOUR SQL HERE"
+  npx wrangler d1 execute hivconnect-db-production --remote --command "YOUR SQL HERE"
   ```
 - **SQL file execution**:
   ```bash
-  npx wrangler d1 execute hivconnect-db-production --env production --remote --file path/to/file.sql
+  npx wrangler d1 execute hivconnect-db-production --remote --file path/to/file.sql
   ```
 - **Key tables**: `providers` (19 rows), `providers_services_medical`, `providers_services_support`, `providers_services_prevention`, `providers_languages`, `providers_accessibility`, `providers_eligibility`, `providers_insurance`, `providers_ryan_white_parts`, `blog`, `faqs`, `resources`, `events`, `pages`, `media`, `users`
 - **Related table pattern**: Array fields use child tables with `_order` (INTEGER), `_parent_id` (INTEGER FK), `id` (TEXT, 24-char hex), and a value column (e.g., `service`, `language`, `feature`, `plan`, `requirement`). Exception: `providers_ryan_white_parts` uses `order`, `parent_id`, `value`, `id` (INTEGER PK).
@@ -1500,14 +1502,14 @@ npm run payload:generate-types
 
 ```bash
 # Frontend
-git clone https://github.com/jukeboxjay/mshtga.git
+git clone https://github.com/shuffle-studio/hivconnect-frontend.git mshtga
 cd mshtga
 npm install
 
-# Backend (once created)
-git clone https://github.com/shuffleseo/mshtga-backend.git
+# Backend
+git clone https://github.com/shuffle-studio/hivconnect-backend.git mshtga-backend
 cd mshtga-backend
-npm install
+pnpm install
 ```
 
 #### 2. Environment Variables
@@ -2485,27 +2487,33 @@ The following goals provide context, but **Linear is the single source of truth*
 
 This section provides a quick overview of the project's current state and recent progress. **For detailed task tracking, always check Linear first** (https://linear.app/shuffle-studio/issue/SHU-9).
 
-### Last Session: February 18, 2026
+### Last Session: February 27, 2026
 
-**Production Launch Sprint — ALL COMPLETE**:
-- ✅ SHU-519/523/526: Linear housekeeping (marked Done, already shipped in `df81b9e`)
-- ✅ SHU-524: RWJ Dental as separate provider — added to `providers.ts` AND PayloadCMS D1 via wrangler SQL
-- ✅ SHU-525: Walk-in/appointment badges on ProviderCard + [id].astro
-- ✅ SHU-520: Ryan White info template on provider detail pages
-- ✅ Lexical rich text fix (`renderLexicalToHTML`) for FAQ, [slug], resources pages
-- ✅ SHU-574: Full 26-file visual redesign (red → teal/coral, gray → stone, hero overlays lightened)
+**Repo Cleanup — Local Directories Consolidated**:
+- ✅ Verified `kevinshuffle/hivconnect-backend` redirects to `shuffle-studio/hivconnect-backend` (same repo, transferred)
+- ✅ Archived stale `mshtga-backend/` (Express/Slate, no git) → `mshtga-backend-OLD/`
+- ✅ Cloned canonical `shuffle-studio/hivconnect-backend` as new `mshtga-backend/`
+- ✅ Deleted redundant `mshtga-backend-workers/` (was same repo, now consolidated)
+- ✅ Moved `scripts/update-providers.sql` from frontend to backend repo
+- ✅ Updated CLAUDE.md references (wrangler.jsonc, clone URLs, D1 commands)
 
-**Key Commits**:
-- `2bec20b` — Main sprint commit (26 files: all features + full redesign)
-- `f780f96` — Empty commit to trigger Cloudflare Pages rebuild for D1 data
+**Previous Session: February 18, 2026 — Production Launch Sprint**:
+- ✅ SHU-519/523/526/524/525/520/574: All complete
+- ✅ Lexical rich text fix for FAQ, [slug], resources pages
+- Key commits: `2bec20b` (main sprint), `f780f96` (rebuild trigger)
 
 **Infrastructure Connections Verified**:
 - Wrangler authenticated as `kevin@shufflestudio.io` (OAuth token)
 - Cloudflare account: Shuffle Studio (`77936f7f1fecd5df8504adaf96fad1fb`)
 - D1 database: `hivconnect-db-production` (`4dc8866a-3444-46b8-b73a-4def21b45772`)
-- Can execute SQL directly via: `cd mshtga-backend && npx wrangler d1 execute hivconnect-db-production --env production --remote --command "SQL_HERE"`
+- Can execute SQL directly via: `cd mshtga-backend && npx wrangler d1 execute hivconnect-db-production --remote --command "SQL_HERE"`
 - Pages project: `hivconnect-frontend` (auto-deploys on push to `main`)
-- Backend repo: `~/Desktop/ShuffleSEO/mshtga-backend` (contains `wrangler.toml` with D1/R2 bindings)
+- Backend repo: `~/Desktop/ShuffleSEO/mshtga-backend` (contains `wrangler.jsonc` with D1/R2 bindings)
+
+**Local Directory Layout** (cleaned up Feb 27, 2026):
+- `~/Desktop/ShuffleSEO/mshtga/` — Frontend (Astro 5, `shuffle-studio/hivconnect-frontend`)
+- `~/Desktop/ShuffleSEO/mshtga-backend/` — Backend (Next.js 15 + PayloadCMS 3, `shuffle-studio/hivconnect-backend`)
+- `~/Desktop/ShuffleSEO/mshtga-backend-OLD/` — Archived stale backend (no git, Express/Slate — safe to delete)
 
 **Remaining Backlog** (see Linear for details):
 - SHU-522: Update provider services data (content work for Terri)
@@ -2577,6 +2585,15 @@ This section provides a quick overview of the project's current state and recent
 - Wrangler D1 access verified and documented (can INSERT/SELECT production database)
 - Updated Session Continuity, Current State, and infrastructure details in CLAUDE.md
 - All sprint Linear issues marked Done (SHU-519/520/523/524/525/526/574)
+
+### February 27, 2026
+- **Repo cleanup**: Consolidated local backend directories
+- Archived stale `mshtga-backend/` (Express/Slate, no git) → `mshtga-backend-OLD/`
+- Cloned canonical `shuffle-studio/hivconnect-backend` as new `mshtga-backend/`
+- Deleted redundant `mshtga-backend-workers/` (same repo, now consolidated)
+- Moved `scripts/update-providers.sql` from frontend to backend repo
+- Updated CLAUDE.md: wrangler.jsonc refs, clone URLs, D1 commands, session continuity
+- Verified `kevinshuffle/hivconnect-backend` → `shuffle-studio/hivconnect-backend` (repo transfer)
 
 ### [Future Updates]
 - Populate Bylaws/Service Standards collections (SHU-528)
