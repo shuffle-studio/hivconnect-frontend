@@ -174,14 +174,18 @@ const categoryInfo: Record<string, { label: string; icon: string; description: s
                         </svg>
                       </div>
 
-                      {/* Rich text description - simplified for MVP */}
-                      <p class="text-gray-600 text-sm mb-4 flex-grow line-clamp-3">
-                        {typeof resource.description === 'string'
-                          ? resource.description
-                          : resource.description
-                            ? renderLexicalToHTML(resource.description) || 'Click to learn more about this resource.'
-                            : 'Click to learn more about this resource.'}
-                      </p>
+                      {/* Rich text description */}
+                      {typeof resource.description === 'string' ? (
+                        <p class="text-gray-600 text-sm mb-4 flex-grow line-clamp-3">
+                          {resource.description}
+                        </p>
+                      ) : resource.description ? (
+                        <div class="text-gray-600 text-sm mb-4 flex-grow line-clamp-3" set:html={renderLexicalToHTML(resource.description) || 'Click to learn more about this resource.'} />
+                      ) : (
+                        <p class="text-gray-600 text-sm mb-4 flex-grow line-clamp-3">
+                          Click to learn more about this resource.
+                        </p>
+                      )}
 
                       <div class="flex items-center text-sm text-primary-600 font-medium group-hover:text-primary-700">
                         <span>Visit Website</span>
