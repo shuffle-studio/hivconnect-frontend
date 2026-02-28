@@ -8,7 +8,7 @@ import EventMap from '../../components/events/EventMap';
 export async function getStaticPaths() {
   try {
     // Fetch all published events (upcoming and past) for static generation
-    const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://hivconnect-backend-production.shuffle-seo.workers.dev';
+    const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://hivconnect-backend.shufflestudio.workers.dev';
     const API_BASE_URL = `${PAYLOAD_URL}/api`;
 
     const response = await fetch(

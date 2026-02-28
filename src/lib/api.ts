@@ -2,7 +2,7 @@
 import type { Provider } from '../types/provider';
 
 // Use PUBLIC_PAYLOAD_URL (without /api suffix) for the base URL
-const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://hivconnect-backend-production.shuffle-seo.workers.dev';
+const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://hivconnect-backend.shufflestudio.workers.dev';
 const API_BASE_URL = `${PAYLOAD_URL}/api`;
 
 // FAQ type definitions
@@ -347,7 +347,7 @@ function transformProvider(payloadProvider: PayloadProvider): Provider {
         std_testing: hasService(medical, 'std_testing'),
         specialty_care: getSpecialtyCare(medical),
         dental_care: hasService(medical, 'dental_care'),
-        mental_health_medical: hasService(medical, 'mental_health'),
+        mental_health_medical: hasService(medical, 'mental_health_medical') || hasService(medical, 'mental_health'),
       },
       support_services: {
         case_management: hasService(support, 'case_management'),

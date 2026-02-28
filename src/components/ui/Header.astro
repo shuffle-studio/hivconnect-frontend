@@ -7,7 +7,7 @@ import { t, getCurrentLanguage } from '../../i18n/astro-utils';
 const currentLanguage = getCurrentLanguage(Astro.currentLocale);
 
 // Fetch navigation from SiteSettings
-const API_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://hivconnect-backend-production.shuffle-seo.workers.dev';
+const API_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://hivconnect-backend.shufflestudio.workers.dev';
 
 let navigation = [];
 try {
