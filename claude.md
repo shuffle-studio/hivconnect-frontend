@@ -72,9 +72,9 @@ See [Linear Integration & Workflow](#linear-integration--workflow) section below
 - **Trigger rebuild**: Push to `main` or empty commit `git commit --allow-empty -m "trigger rebuild"`
 
 ### Backend (Cloudflare Workers)
-- **Worker**: `hivconnect-backend-production`
-- **URL**: `hivconnect-backend-production.shuffle-seo.workers.dev`
-- **Admin**: `hivconnect-backend-production.shuffle-seo.workers.dev/admin`
+- **Worker**: `hivconnect-backend`
+- **URL**: `hivconnect-backend.shufflestudio.workers.dev`
+- **Admin**: `hivconnect-backend.shufflestudio.workers.dev/admin`
 - **Local Path**: `~/Desktop/ShuffleSEO/mshtga-backend`
 - **Config**: `mshtga-backend/wrangler.jsonc` (contains D1/R2 bindings)
 - **Stack**: Next.js 15 + PayloadCMS 3 + Lexical rich text (deployed via OpenNext for Cloudflare)
@@ -147,7 +147,7 @@ HIV Connect Central NJ is a comprehensive web platform for the Middlesex-Somerse
 ### Current State (as of Feb 18, 2026)
 
 **✅ PRODUCTION DEPLOYED**:
-- **Backend**: PayloadCMS on Cloudflare Workers (`hivconnect-backend-production.shuffle-seo.workers.dev`)
+- **Backend**: PayloadCMS on Cloudflare Workers (`hivconnect-backend.shufflestudio.workers.dev`)
 - **Frontend**: Astro 5 on Cloudflare Pages (`hivconnect-frontend.pages.dev` → `hivconnectcnj.org`)
 - **Database**: Cloudflare D1 — `hivconnect-db-production` (ID: `4dc8866a-3444-46b8-b73a-4def21b45772`)
 - **Storage**: Cloudflare R2 (PDFs and media)
@@ -499,7 +499,7 @@ CLOUDFLARE_ENV=production pnpm run deploy:database
 | Environment | Purpose | Database | R2 Bucket | Backend URL | Frontend URL |
 |-------------|---------|----------|-----------|-------------|--------------|
 | **Local** | Development | Local SQLite | Local filesystem | `localhost:3000` | `localhost:4321` |
-| **Production** | Live site | `hivconnect-db-production` | `hivconnect-media-production` | `hivconnect-backend-production.shuffle-seo.workers.dev` | `hivconnectcnj.org` |
+| **Production** | Live site | `hivconnect-db-production` | `hivconnect-media-production` | `hivconnect-backend.shufflestudio.workers.dev` | `hivconnectcnj.org` |
 
 **⚠️ NO STAGING** per client directive - see [Deployment Policy](#-deployment-policy---production-only)
 
