@@ -17,7 +17,7 @@
 | Environment | Frontend | Backend |
 |---|---|---|
 | Local | `localhost:4321` | `localhost:3000` |
-| Production | `hivconnectcnj.org` | `hivconnect-backend.shufflestudio.workers.dev` |
+| Production | `hivconnectcentralnj.com` | `login.hivconnectcentralnj.com` |
 
 **Auto-rebuild**: CMS content changes trigger Cloudflare Pages deploy hook. Frontend live in ~2-3 min.
 Manual rebuild: push to `main` or `git commit --allow-empty -m "trigger rebuild"`.
@@ -32,13 +32,13 @@ Manual rebuild: push to `main` or `git commit --allow-empty -m "trigger rebuild"
 
 ### Frontend (Cloudflare Pages)
 - **Project**: `hivconnect-frontend`
-- **URL**: `hivconnect-frontend.pages.dev` → `hivconnectcnj.org`
+- **URL**: `hivconnect-frontend.pages.dev` → `hivconnectcentralnj.com`
 - Auto-deploys on push to `main`
 
 ### Backend (Cloudflare Workers)
 - **Worker**: `hivconnect-backend`
-- **URL**: `hivconnect-backend.shufflestudio.workers.dev`
-- **Admin**: `hivconnect-backend.shufflestudio.workers.dev/admin`
+- **URL**: `login.hivconnectcentralnj.com`
+- **Admin**: `login.hivconnectcentralnj.com/admin`
 - **Stack**: Next.js 15 + PayloadCMS 3 + Lexical rich text (OpenNext for Cloudflare)
 - **Config**: `mshtga-backend/wrangler.jsonc`
 

@@ -2,7 +2,7 @@
 import type { Provider } from '../types/provider';
 
 // Use PUBLIC_PAYLOAD_URL (without /api suffix) for the base URL
-const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://hivconnect-backend.shufflestudio.workers.dev';
+const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://login.hivconnectcentralnj.com';
 const API_BASE_URL = `${PAYLOAD_URL}/api`;
 
 // FAQ type definitions

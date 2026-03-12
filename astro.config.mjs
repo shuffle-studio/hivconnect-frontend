@@ -6,7 +6,7 @@ import tailwind from '@astrojs/tailwind';
 // https://astro.build/config
 export default defineConfig({
   integrations: [react(), tailwind()],
-  site: 'https://hivconnectcnj.org',
+  site: 'https://hivconnectcentralnj.com',
   output: 'static',
   build: {
     inlineStylesheets: 'auto'
