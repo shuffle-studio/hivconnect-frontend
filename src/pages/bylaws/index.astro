@@ -3,6 +3,15 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/ui/Header.astro';
 import Footer from '../../components/ui/Footer.astro';
 
+function getFileLabel(doc: any): string {
+  const name = (doc?.filename || doc?.url || '').toLowerCase();
+  const mime = (doc?.mimeType || '').toLowerCase();
+  if (mime.includes('pdf') || name.endsWith('.pdf')) return 'PDF';
+  if (mime.includes('word') || name.endsWith('.docx') || name.endsWith('.doc')) return 'Word Doc';
+  if (mime.includes('spreadsheet') || name.endsWith('.xlsx') || name.endsWith('.xls')) return 'Spreadsheet';
+  return 'Document';
+}
+
 // Fetch bylaws from Payload API
 const API_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://login.hivconnectcentralnj.com';
 
@@ -93,7 +102,7 @@ try {
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Download PDF
+                Download {getFileLabel(bylaws.document)}
               </a>
 
               <a
@@ -109,19 +118,21 @@ try {
               </a>
             </div>
 
-            {/* Embedded PDF Viewer (for desktop) */}
-            <div class="hidden md:block">
-              <iframe
-                src={bylaws.document.url}
-                class="w-full h-[800px] border border-gray-300 rounded-lg"
-                title="Bylaws PDF Viewer"
-              ></iframe>
-            </div>
+            {/* Embedded PDF Viewer (desktop, PDFs only) */}
+            {(bylaws.document.mimeType?.includes('pdf') || bylaws.document.filename?.endsWith('.pdf')) && (
+              <div class="hidden md:block">
+                <iframe
+                  src={bylaws.document.url}
+                  class="w-full h-[800px] border border-gray-300 rounded-lg"
+                  title="Bylaws Document Viewer"
+                ></iframe>
+              </div>
+            )}
 
-            {/* Mobile: Show download prompt */}
-            <div class="md:hidden bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg">
+            {/* Non-PDF or mobile: Show download prompt */}
+            <div class={(bylaws.document.mimeType?.includes('pdf') || bylaws.document.filename?.endsWith('.pdf')) ? 'md:hidden bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg' : 'bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg'}>
               <p class="text-sm">
-                PDF viewing works best on desktop. Please use the download or open buttons above to view the document.
+                Use the download or open buttons above to view this document.
               </p>
             </div>
           </div>
