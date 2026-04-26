@@ -1,4 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+
+declare global {
+  interface Window {
+    turnstile: {
+      render: (container: HTMLElement, options: { sitekey: string; callback: (token: string) => void }) => string;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
 import Step1PersonalInfo from './steps/Step1PersonalInfo';
 import Step2Demographics from './steps/Step2Demographics';
 import Step3Services from './steps/Step3Services';
@@ -113,6 +122,53 @@ export default function PlanningCouncilForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    document.head.appendChild(script);
+    return () => { document.head.removeChild(script); };
+  }, []);
+
+  useEffect(() => {
+    if (currentStep !== 5 || !turnstileContainerRef.current) return;
+    const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined;
+    if (!siteKey) return;
+
+    const renderWidget = () => {
+      if (!window.turnstile || !turnstileContainerRef.current) return;
+      if (turnstileWidgetId.current) {
+        window.turnstile.remove(turnstileWidgetId.current);
+      }
+      turnstileWidgetId.current = window.turnstile.render(turnstileContainerRef.current, {
+        sitekey: siteKey,
+        callback: (token: string) => setTurnstileToken(token),
+      });
+    };
+
+    if (window.turnstile) {
+      renderWidget();
+    } else {
+      const interval = setInterval(() => {
+        if (window.turnstile) {
+          clearInterval(interval);
+          renderWidget();
+        }
+      }, 100);
+      return () => clearInterval(interval);
+    }
+
+    return () => {
+      if (turnstileWidgetId.current && window.turnstile) {
+        window.turnstile.remove(turnstileWidgetId.current);
+        turnstileWidgetId.current = null;
+      }
+    };
+  }, [currentStep]);
 
   const totalSteps = 5;
   const progress = (currentStep / totalSteps) * 100;
@@ -148,6 +204,7 @@ export default function PlanningCouncilForm() {
       case 5:
         if (!formData.agreedToCommitments) newErrors.agreedToCommitments = 'You must agree to the commitments';
         if (!formData.consentGiven) newErrors.consentGiven = 'You must provide consent';
+        if (!turnstileToken) newErrors.turnstile = 'Please complete the security check below';
         break;
     }
 
@@ -235,7 +292,7 @@ export default function PlanningCouncilForm() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(payloadData)
+          body: JSON.stringify({ ...payloadData, turnstileToken })
         });
 
         if (response.ok) {
@@ -320,6 +377,15 @@ export default function PlanningCouncilForm() {
         </div>
 
         {renderStep()}
+
+        {currentStep === 5 && (
+          <div className="mt-6">
+            <div ref={turnstileContainerRef}></div>
+            {errors.turnstile && (
+              <p className="text-red-500 text-sm mt-1">{errors.turnstile}</p>
+            )}
+          </div>
+        )}
 
         <div className="flex justify-between mt-8 pt-6 border-t">
           <button
