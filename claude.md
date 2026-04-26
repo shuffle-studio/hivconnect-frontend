@@ -57,6 +57,32 @@ Manual rebuild: push to `main` or `git commit --allow-empty -m "trigger rebuild"
 - **Public**: `GET /api/providers`, `/api/blog`, `/api/resources`, `/api/faqs`, `/api/pages`, `/api/events`
 - **Frontend fetches**: `src/lib/api.ts`
 
+### Security — Cloudflare Turnstile + WAF (added 2026-04-26)
+
+**Turnstile (CAPTCHA)**
+- Protects `POST /api/membership-applications` (Planning Council Application form)
+- Site: "HIV Connect Planning Council Form" — Type: **Managed** (invisible unless suspicious)
+- Site Key: `0x4AAAAAADDxQ3P1YQIuWCwC` — stored as `PUBLIC_TURNSTILE_SITE_KEY` in CF Pages env
+- Secret Key: stored as `TURNSTILE_SECRET_KEY` in Worker vars (CF Dashboard → Workers → hivconnect-backend → Settings → Variables)
+- Frontend: widget renders on Step 5 via `window.turnstile.render()` (explicit mode, `?render=explicit`)
+- Backend: `MembershipApplications` `beforeValidate` hook verifies token via Cloudflare siteverify API; throws `400` if missing or invalid; strips token before saving to D1
+- Safe rollout: hook is no-op if `TURNSTILE_SECRET_KEY` is unset
+
+**WAF Rate Limiting**
+- Rule name: "HIV Connect API Rate Limit" — zone: `hivconnectcentralnj.com`
+- Expression: `http.request.method eq "POST" and http.request.uri.path contains "/api/membership-applications"`
+- Threshold: **5 requests per 10 seconds per IP** → Block for 10 seconds
+- Free plan only supports 10-second windows (no 1-minute option)
+- Manage: CF Dashboard → hivconnectcentralnj.com → Security → Security Rules → Rate limiting rules
+
+**CF Pages env var gotcha**: The CF Dashboard Variables UI has a React input bug where typed values don't register. Use the API instead:
+```bash
+curl -X PATCH "https://api.cloudflare.com/client/v4/accounts/77936f7f1fecd5df8504adaf96fad1fb/pages/projects/hivconnect-frontend" \
+  -H "Authorization: Bearer $(cat ~/Library/Preferences/.wrangler/config/default.toml | grep oauth_token | cut -d'"' -f2)" \
+  -H "Content-Type: application/json" \
+  --data '{"deployment_configs":{"production":{"env_vars":{"VAR_NAME":{"value":"VAR_VALUE"}}}}}'
+```
+
 ---
 
 ## Database Tables
@@ -139,7 +165,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - `tailwind.config.mjs` — Tailwind config
 
 **Backend** (`mshtga-backend/`):
-- `wrangler.jsonc` — Cloudflare Workers config (D1/R2 bindings, deploy hook)
+- `wrangler.jsonc` — Cloudflare Workers config (D1/R2 bindings, deploy hook, env vars)
+- `src/collections/MembershipApplications.ts` — Planning Council form collection + Turnstile verification hook
 - `src/hooks/triggerFrontendRebuild.ts` — Auto-rebuild hook
 
 ---
