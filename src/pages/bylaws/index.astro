@@ -12,6 +12,10 @@ function getFileLabel(doc: any): string {
   return 'Document';
 }
 
+function getViewerUrl(doc: any): string {
+  return `https://docs.google.com/viewer?url=${encodeURIComponent(doc.url)}`;
+}
+
 // Fetch bylaws from Payload API
 const API_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://login.hivconnectcentralnj.com';
 
@@ -106,7 +110,7 @@ try {
               </a>
 
               <a
-                href={bylaws.document.url}
+                href={getViewerUrl(bylaws.document)}
                 target="_blank"
                 rel="noopener noreferrer"
                 class="inline-flex items-center justify-center px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors"
