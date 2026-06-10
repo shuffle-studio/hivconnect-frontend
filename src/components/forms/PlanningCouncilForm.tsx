@@ -199,6 +199,7 @@ export default function PlanningCouncilForm() {
         break;
       case 4:
         if (!formData.whyJoinPlanningCouncil.trim()) newErrors.whyJoinPlanningCouncil = 'Please explain why you want to join';
+        if (!formData.hivAidsExperience.trim()) newErrors.hivAidsExperience = 'Please describe your HIV/AIDS experience';
         if (formData.membershipCategories.length === 0) newErrors.membershipCategories = 'Please select at least one membership category';
         break;
       case 5:
@@ -229,61 +230,60 @@ export default function PlanningCouncilForm() {
         const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://login.hivconnectcentralnj.com';
         const API_BASE_URL = `${PAYLOAD_URL}/api`;
 
-        // Transform flat formData into nested structure for PayloadCMS
+        // Map form data to the backend's flat membership-applications schema.
+        // Field names match the backend collection exactly. Multi-select values
+        // are sent as Payload array rows ({ subfield: value }).
         const payloadData = {
           status: 'pending',
-          personalInfo: {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            birthMonth: formData.birthMonth,
-            birthDay: formData.birthDay,
-            birthYear: formData.birthYear,
-            streetAddress: formData.streetAddress,
-            addressLine2: formData.addressLine2,
-            city: formData.city,
-            state: formData.state,
-            zipCode: formData.zipCode,
-            country: formData.country,
-            email: formData.email,
-            confirmEmail: formData.confirmEmail,
-            homePhone: formData.homePhone,
-            cellPhone: formData.cellPhone,
-            bestTimeToCall: formData.bestTimeToCall,
-          },
-          employment: {
-            isEmployed: formData.isEmployed,
-            employers: formData.employers,
-            jobTitle: formData.jobTitle,
-            companyAddress: formData.companyAddress,
-            companyAddressLine2: formData.companyAddressLine2,
-            companyCity: formData.companyCity,
-            companyState: formData.companyState,
-            companyZipCode: formData.companyZipCode,
-          },
-          demographics: {
-            mailingLists: formData.mailingLists.map(list => ({ list })),
-            receivedRyanWhiteServices: formData.receivedRyanWhiteServices,
-            gender: formData.gender,
-            age: formData.age,
-            raceEthnicity: formData.raceEthnicity,
-            languages: formData.languages.map(language => ({ language })),
-            diverseExperience: formData.diverseExperience.map(experience => ({ experience })),
-            serviceProviders: formData.serviceProviders.map(provider => ({ provider })),
-            needsAssistance: formData.needsAssistance,
-            assistanceDescription: formData.assistanceDescription,
-          },
-          experience: {
-            whyJoinPlanningCouncil: formData.whyJoinPlanningCouncil,
-            hivAidsExperience: formData.hivAidsExperience,
-            backgroundExperience: formData.backgroundExperience,
-            eligibilityInfo: formData.eligibilityInfo,
-            membershipCategories: formData.membershipCategories.map(category => ({ category })),
-            experienceInterests: formData.experienceInterests.map(interest => ({ interest })),
-          },
-          commitment: {
-            agreedToCommitments: formData.agreedToCommitments,
-            consentGiven: formData.consentGiven,
-          },
+          fullName: `${formData.firstName} ${formData.lastName}`.trim(),
+          // Personal
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          birthMonth: formData.birthMonth,
+          birthDay: formData.birthDay,
+          birthYear: formData.birthYear,
+          email: formData.email,
+          confirmEmail: formData.confirmEmail,
+          phone: formData.cellPhone || formData.homePhone || '',
+          homePhone: formData.homePhone,
+          cellPhone: formData.cellPhone,
+          bestTimeToCall: formData.bestTimeToCall,
+          streetAddress: formData.streetAddress,
+          addressLine2: formData.addressLine2,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          country: formData.country,
+          // Employment
+          isEmployed: formData.isEmployed,
+          employers: formData.employers,
+          jobTitle: formData.jobTitle,
+          companyAddress: formData.companyAddress,
+          companyAddressLine2: formData.companyAddressLine2,
+          companyCity: formData.companyCity,
+          companyState: formData.companyState,
+          companyZipCode: formData.companyZipCode,
+          // Demographics
+          receivedRyanWhiteServices: formData.receivedRyanWhiteServices,
+          gender: formData.gender,
+          age: formData.age,
+          raceEthnicity: formData.raceEthnicity,
+          mailingLists: formData.mailingLists.map(list => ({ list })),
+          languages: formData.languages.map(language => ({ language })),
+          diverseExperience: formData.diverseExperience.map(experience => ({ experience })),
+          serviceProviders: formData.serviceProviders.map(provider => ({ provider })),
+          needsAssistance: formData.needsAssistance,
+          assistanceDescription: formData.assistanceDescription,
+          // Experience
+          whyJoin: formData.whyJoinPlanningCouncil,
+          hivExperience: formData.hivAidsExperience,
+          backgroundExperience: formData.backgroundExperience,
+          eligibilityInfo: formData.eligibilityInfo,
+          membershipCategories: formData.membershipCategories.map(category => ({ category })),
+          experienceInterests: formData.experienceInterests.map(interest => ({ interest })),
+          // Commitment
+          agreedToCommitments: formData.agreedToCommitments,
+          consentGiven: formData.consentGiven,
         };
 
         // Submit to PayloadCMS API

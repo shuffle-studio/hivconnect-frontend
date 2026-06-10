@@ -91,15 +91,18 @@ export default function Step4Experience({ formData, updateFormData, errors }: St
       {/* HIV/AIDS Experience */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Please describe any work and/or volunteer experiences you have had in HIV/AIDS service provision and/or advocacy
+          Please describe any work and/or volunteer experiences you have had in HIV/AIDS service provision and/or advocacy *
         </label>
         <textarea
           value={formData.hivAidsExperience}
           onChange={(e) => handleInputChange('hivAidsExperience', e.target.value)}
           placeholder="Describe your relevant work or volunteer experience..."
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            errors.hivAidsExperience ? 'border-red-500' : 'border-gray-300'
+          }`}
         />
+        {errors.hivAidsExperience && <p className="text-red-500 text-sm mt-1">{errors.hivAidsExperience}</p>}
       </div>
 
       {/* Background Experience */}

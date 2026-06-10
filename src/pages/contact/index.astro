@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/ui/Header.astro';
 import Footer from '../../components/ui/Footer.astro';
+import ContactForm from '../../components/forms/ContactForm';
 
 const title = "Contact Us";
 const description = "Get in touch with the Middlesex, Somerset & Hunterdon Ryan White Program for HIV care, support services, and resources across Central New Jersey.";
@@ -190,74 +191,7 @@ const description = "Get in touch with the Middlesex, Somerset & Hunterdon Ryan 
           <div>
             <h2 class="text-3xl font-bold text-gray-900 mb-8">Send Us a Message</h2>
             
-            <form class="space-y-6" name="contact" data-netlify="true" method="POST" action="/success">
-              <input type="hidden" name="form-name" value="contact" />
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                  <label for="first-name" class="form-label">First Name *</label>
-                  <input type="text" id="first-name" name="first-name" required class="form-input" />
-                </div>
-                <div>
-                  <label for="last-name" class="form-label">Last Name *</label>
-                  <input type="text" id="last-name" name="last-name" required class="form-input" />
-                </div>
-              </div>
-
-              <div>
-                <label for="email" class="form-label">Email Address *</label>
-                <input type="email" id="email" name="email" required class="form-input" />
-              </div>
-
-              <div>
-                <label for="phone" class="form-label">Phone Number</label>
-                <input type="tel" id="phone" name="phone" class="form-input" />
-              </div>
-
-              <div>
-                <label for="county" class="form-label">County</label>
-                <select id="county" name="county" class="form-input">
-                  <option value="">Select your county</option>
-                  <option value="middlesex">Middlesex County</option>
-                  <option value="somerset">Somerset County</option>
-                  <option value="hunterdon">Hunterdon County</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label for="inquiry-type" class="form-label">How can we help you? *</label>
-                <select id="inquiry-type" name="inquiry-type" required class="form-input">
-                  <option value="">Select an option</option>
-                  <option value="services">I need information about services</option>
-                  <option value="testing">I want to get tested</option>
-                  <option value="treatment">I need help with treatment</option>
-                  <option value="support">I need support services</option>
-                  <option value="planning-council">Planning Council information</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label for="message" class="form-label">Message *</label>
-                <textarea id="message" name="message" rows="4" required class="form-input" placeholder="Please tell us how we can help you..."></textarea>
-              </div>
-
-              <div class="bg-stone-50 rounded-lg p-4">
-                <p class="text-sm text-gray-600 mb-3">
-                  <strong>Privacy Notice:</strong> Your information is confidential and protected by federal and state privacy laws. We will only use your contact information to respond to your inquiry.
-                </p>
-                <label class="flex items-start space-x-3">
-                  <input type="checkbox" required class="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500" />
-                  <span class="text-sm text-gray-700">I understand that my information will be kept confidential and used only to respond to my inquiry. *</span>
-                </label>
-              </div>
-
-              <div>
-                <button type="submit" class="btn-primary w-full">
-                  Send Message
-                </button>
-              </div>
-            </form>
+            <ContactForm client:load />
 
             <div class="mt-8 p-4 bg-primary-50 rounded-lg">
               <p class="text-sm text-primary-800">
