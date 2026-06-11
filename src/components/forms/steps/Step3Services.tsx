@@ -4,10 +4,13 @@ interface Step3ServicesProps {
   formData: FormData;
   updateFormData: (updates: Partial<FormData>) => void;
   errors: {[key: string]: string};
+  serviceProviderOptions?: string[];
 }
 
-export default function Step3Services({ formData, updateFormData, errors }: Step3ServicesProps) {
-  const serviceProviders = [
+export default function Step3Services({ formData, updateFormData, errors, serviceProviderOptions: providerOptionsProp }: Step3ServicesProps) {
+  // Curated provider list (CMS-managed via `service-provider-options`), falling
+  // back to the current values if the API is unavailable.
+  const DEFAULT_PROVIDERS = [
     'Central Jersey Legal Services',
     'Elijah\'s Promise Inc.',
     'Eric B. Chandler Health Center',
@@ -20,10 +23,15 @@ export default function Step3Services({ formData, updateFormData, errors }: Step
     'Robert Wood Johnson Hospital Dental Program',
     'Somerset Treatment Services',
     'Visiting Nurse Association of Central New Jersey',
-    'Zufall Health Center - Somerset',
+    'Zufall Health Center - Somerset'
+  ];
+  // Fixed answer choices (not providers) — always appended after the provider list.
+  const META_OPTIONS = [
     'No, I do not receive Ryan White Part A Services',
     'I don\'t know if I receive Ryan White Part A Services'
   ];
+  const providers = providerOptionsProp && providerOptionsProp.length ? providerOptionsProp : DEFAULT_PROVIDERS;
+  const serviceProviders = [...providers, ...META_OPTIONS];
 
   const handleInputChange = (field: keyof FormData, value: string | boolean) => {
     updateFormData({ [field]: value });

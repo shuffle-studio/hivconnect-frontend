@@ -125,6 +125,29 @@ export default function PlanningCouncilForm() {
   const [turnstileToken, setTurnstileToken] = useState('');
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetId = useRef<string | null>(null);
+  const [providerOptions, setProviderOptions] = useState<string[] | null>(null);
+  const [committeeOptions, setCommitteeOptions] = useState<string[] | null>(null);
+
+  // Load CMS-managed option lists for the form. Falls back silently to the
+  // hardcoded defaults inside Step1/Step3 if the API is unavailable.
+  useEffect(() => {
+    const PAYLOAD_URL = import.meta.env.PUBLIC_PAYLOAD_URL || 'https://login.hivconnectcentralnj.com';
+    const load = async (slug: string, setter: (v: string[]) => void) => {
+      try {
+        const res = await fetch(`${PAYLOAD_URL}/api/${slug}?where[active][equals]=true&limit=100&sort=order&depth=0`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const labels = (data?.docs ?? [])
+          .map((d: { label?: string }) => d.label)
+          .filter((l: unknown): l is string => typeof l === 'string' && l.length > 0);
+        if (labels.length) setter(labels);
+      } catch {
+        /* keep fallback */
+      }
+    };
+    load('service-provider-options', setProviderOptions);
+    load('committees', setCommitteeOptions);
+  }, []);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -318,6 +341,7 @@ export default function PlanningCouncilForm() {
             formData={formData}
             updateFormData={updateFormData}
             errors={errors}
+            mailingListOptions={committeeOptions ?? undefined}
           />
         );
       case 2:
@@ -334,6 +358,7 @@ export default function PlanningCouncilForm() {
             formData={formData}
             updateFormData={updateFormData}
             errors={errors}
+            serviceProviderOptions={providerOptions ?? undefined}
           />
         );
       case 4:

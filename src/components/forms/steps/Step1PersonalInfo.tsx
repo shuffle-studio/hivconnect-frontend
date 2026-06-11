@@ -4,9 +4,10 @@ interface Step1PersonalInfoProps {
   formData: FormData;
   updateFormData: (updates: Partial<FormData>) => void;
   errors: {[key: string]: string};
+  mailingListOptions?: string[];
 }
 
-export default function Step1PersonalInfo({ formData, updateFormData, errors }: Step1PersonalInfoProps) {
+export default function Step1PersonalInfo({ formData, updateFormData, errors, mailingListOptions: mailingListOptionsProp }: Step1PersonalInfoProps) {
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
@@ -23,12 +24,15 @@ export default function Step1PersonalInfo({ formData, updateFormData, errors }: 
     'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
   ];
 
-  const mailingListOptions = [
+  // Committee mailing-list options (CMS-managed via the `committees` collection),
+  // falling back to the current values if the API is unavailable.
+  const DEFAULT_MAILING_LISTS = [
     'Planning Council (usually 1st Tuesday of each month 6-8pm)',
-    'Quality Improvement and Strategic Planning (every other month-3rd Tuesday 2-4pm)', 
+    'Quality Improvement and Strategic Planning (every other month-3rd Tuesday 2-4pm)',
     'Membership & Bylaws Committee (3rd Wednesday of each month 1-2pm)',
     'Mentorship & Outreach (every other month- 2nd Wednesday 6-8pm)'
   ];
+  const mailingListOptions = mailingListOptionsProp && mailingListOptionsProp.length ? mailingListOptionsProp : DEFAULT_MAILING_LISTS;
 
   const handleInputChange = (field: keyof FormData, value: string | boolean) => {
     updateFormData({ [field]: value });
