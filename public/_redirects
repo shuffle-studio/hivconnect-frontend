@@ -1,0 +1,15 @@
+# Cloudflare Pages redirects (replaces the dead netlify.toml rules)
+
+# www -> apex (takes effect once www is routed to this Pages project)
+https://www.hivconnectcentralnj.com/* https://hivconnectcentralnj.com/:splat 301
+
+# Old /en/ prefixed URLs -> unprefixed (default locale)
+/en/* /:splat 301
+
+# Common old WordPress-era paths -> closest new page
+/wp-login.php / 301
+/wp-admin/* / 301
+/category/* /resources/ 301
+/blog/* /resources/ 301
+/services/* /find-services/ 301
+/testing/* /get-tested/ 301

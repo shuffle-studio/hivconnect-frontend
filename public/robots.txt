@@ -1,0 +1,7 @@
+# HIV Connect Central NJ
+# Cloudflare appends its managed content-signal block to this file at the edge.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://hivconnectcentralnj.com/sitemap-index.xml
