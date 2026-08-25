@@ -164,8 +164,77 @@ export function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
+/**
+ * Change Order #1 promised "Timezone handling (EST default)". Without pinning,
+ * `toLocaleTimeString` uses the VIEWER's zone — someone reading from California
+ * saw the 6:00 PM Medicare session as 3:00 PM. Every displayed time and date
+ * below is Eastern, regardless of where the reader is.
+ */
+export const EVENT_TZ = 'America/New_York';
+
+/**
+ * "YYYY-MM-DD" for an instant, as it falls in Eastern time. Used to bucket
+ * occurrences into calendar squares. en-CA gives ISO-ordered output.
+ */
+export function dayKeyET(d: Date): string {
+  return d.toLocaleDateString('en-CA', { timeZone: EVENT_TZ });
+}
+
+/**
+ * "YYYY-MM-DD" for a calendar square. Squares are built with `new Date(y, m, d)`
+ * — local midnight — so they are read with the viewer's own zone and compared
+ * against `dayKeyET` as plain strings. Matching on strings rather than
+ * timestamps is what keeps an 8pm ET event from sliding into the next square
+ * for a reader in Europe.
+ */
+export function dayKeyLocal(d: Date): string {
+  return d.toLocaleDateString('en-CA');
+}
+
 export function formatTime(d: Date): string {
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  return d.toLocaleTimeString('en-US', {
+    timeZone: EVENT_TZ,
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
+
+/** Long-form date, pinned to Eastern. */
+export function formatEventDate(d: Date): string {
+  return d.toLocaleDateString('en-US', {
+    timeZone: EVENT_TZ,
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+/**
+ * Which month should the calendar open on?
+ *
+ * Opening on "today" is wrong for a sparse calendar. With two published events
+ * six weeks apart, the day after the August event the page would open on an
+ * empty-looking August and hide October two clicks away — which reads as a
+ * broken calendar, not an empty month.
+ */
+export function initialMonth(events: Event[], now: Date): Date {
+  const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+  const upcoming = events
+    .map((e) => new Date(e.startDate))
+    .filter((d) => d.getTime() >= now.getTime())
+    .sort((a, b) => a.getTime() - b.getTime());
+
+  // Something still to come this month — stay put.
+  if (upcoming.some((d) => d <= monthEnd)) return thisMonth;
+
+  // Otherwise jump to the next event. Nothing upcoming at all: stay on today,
+  // so the page doesn't strand the reader in an old month.
+  const next = upcoming[0];
+  return next ? new Date(next.getFullYear(), next.getMonth(), 1) : thisMonth;
 }
 
 export function formatMonthYear(d: Date): string {

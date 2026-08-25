@@ -98,9 +98,89 @@ function isPastEvent(dateString: string): boolean {
 // Meta information
 const title = finalEvent ? `${finalEvent.title} | HIV Connect Central NJ` : 'Event Not Found';
 const description = finalEvent ? extractTextFromLexical(finalEvent.description).substring(0, 160) : 'Event details';
+
+/*
+ * schema.org Event markup.
+ *
+ * Change Order #1 listed "SEO-friendly event pages" under the EV001 MVP. The
+ * pages have titles and descriptions but no structured data, which is what
+ * actually gets an event into Google's event listings and rich results.
+ *
+ * eventAttendanceMode / eventStatus are required for rich results; a cancelled
+ * event must say so here rather than just vanishing, or Google keeps showing
+ * the old listing.
+ */
+const SITE = 'https://hivconnectcentralnj.com';
+
+const ATTENDANCE_MODE: Record<string, string> = {
+  'in-person': 'https://schema.org/OfflineEventAttendanceMode',
+  virtual: 'https://schema.org/OnlineEventAttendanceMode',
+  hybrid: 'https://schema.org/MixedEventAttendanceMode',
+};
+
+function buildEventSchema(event: Event) {
+  const loc = event.location ?? ({} as Event['location']);
+
+  const place =
+    loc.type === 'virtual'
+      ? { '@type': 'VirtualLocation', url: loc.virtualLink || `${SITE}/events/${event.slug}` }
+      : {
+          '@type': 'Place',
+          name: loc.venueName || 'HIV Connect Central NJ',
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: loc.address || undefined,
+            addressLocality: loc.city || undefined,
+            addressRegion: loc.state || 'NJ',
+            postalCode: loc.zipCode || undefined,
+            addressCountry: 'US',
+          },
+        };
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: event.title,
+    description: extractTextFromLexical(event.description).substring(0, 500),
+    startDate: event.startDate,
+    endDate: event.endDate || undefined,
+    eventAttendanceMode: ATTENDANCE_MODE[loc.type] ?? ATTENDANCE_MODE['in-person'],
+    eventStatus:
+      event.status === 'cancelled'
+        ? 'https://schema.org/EventCancelled'
+        : 'https://schema.org/EventScheduled',
+    location: place,
+    image: event.featuredImage?.url ? [event.featuredImage.url] : undefined,
+    url: `${SITE}/events/${event.slug}`,
+    organizer: {
+      '@type': 'Organization',
+      name: 'HIV Connect Central NJ',
+      url: SITE,
+    },
+    // These meetings are free and open to the public. Saying so explicitly is
+    // what makes the listing eligible for the "Free" badge.
+    isAccessibleForFree: true,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      url: event.rsvpLink || `${SITE}/events/${event.slug}`,
+      validFrom: event.createdAt,
+    },
+  };
+}
+
+const eventSchema = finalEvent ? buildEventSchema(finalEvent) : null;
 ---
 
 <BaseLayout title={title} description={description}>
+  {eventSchema && (
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(eventSchema)}
+    />
+  )}
   <div class="min-h-screen bg-stone-50 py-12">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       <!-- Back Link -->

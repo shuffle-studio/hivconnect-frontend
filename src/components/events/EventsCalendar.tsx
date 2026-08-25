@@ -4,10 +4,13 @@ import {
   CATEGORY_LABELS,
   CATEGORY_STYLES,
   buildMonthGrid,
+  dayKeyET,
+  dayKeyLocal,
   expandAll,
+  formatEventDate,
   formatMonthYear,
   formatTime,
-  isSameDay,
+  initialMonth,
   resolveDateRange,
   type DateRangePreset,
   type EventOccurrence,
@@ -42,7 +45,7 @@ export default function EventsCalendar({ events, today }: Props) {
   const now = useMemo(() => (today ? new Date(today) : new Date()), [today]);
 
   const [view, setView] = useState<ViewMode>('calendar');
-  const [month, setMonth] = useState(() => new Date(now.getFullYear(), now.getMonth(), 1));
+  const [month, setMonth] = useState(() => initialMonth(events, now));
   const [categories, setCategories] = useState<string[]>([]);
   const [range, setRange] = useState<DateRangePreset>('all');
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
@@ -72,7 +75,7 @@ export default function EventsCalendar({ events, today }: Props) {
   const byDay = useMemo(() => {
     const map = new Map<string, EventOccurrence[]>();
     for (const occ of filtered) {
-      const key = occ.start.toDateString();
+      const key = dayKeyET(occ.start);
       const list = map.get(key);
       if (list) list.push(occ);
       else map.set(key, [occ]);
@@ -88,7 +91,10 @@ export default function EventsCalendar({ events, today }: Props) {
     setMonth((m) => new Date(m.getFullYear(), m.getMonth() + delta, 1));
   };
 
-  const dayOccurrences = selectedDay ? (byDay.get(selectedDay.toDateString()) ?? []) : [];
+  const dayOccurrences = selectedDay ? (byDay.get(dayKeyLocal(selectedDay)) ?? []) : [];
+  const todayKey = dayKeyET(now);
+  const viewingThisMonth =
+    month.getFullYear() === now.getFullYear() && month.getMonth() === now.getMonth();
   const hasFilters = categories.length > 0 || range !== 'all';
 
   return (
@@ -172,6 +178,7 @@ export default function EventsCalendar({ events, today }: Props) {
         <p className="mt-3 text-sm text-gray-500" aria-live="polite">
           {filtered.length} {filtered.length === 1 ? 'event' : 'events'}
           {hasFilters ? ' match your filters' : ''}
+          <span className="text-gray-400"> · all times Eastern</span>
         </p>
       </div>
 
@@ -187,7 +194,21 @@ export default function EventsCalendar({ events, today }: Props) {
             >
               ←
             </button>
-            <h2 className="text-lg font-semibold text-gray-900">{formatMonthYear(month)}</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold text-gray-900">{formatMonthYear(month)}</h2>
+              {!viewingThisMonth && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDay(null);
+                    setMonth(new Date(now.getFullYear(), now.getMonth(), 1));
+                  }}
+                  className="rounded-md border border-gray-300 px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-100"
+                >
+                  Today
+                </button>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => shiftMonth(1)}
@@ -209,10 +230,11 @@ export default function EventsCalendar({ events, today }: Props) {
 
           <div className="grid grid-cols-7">
             {grid.map((day) => {
-              const dayEvents = byDay.get(day.toDateString()) ?? [];
+              const dayKey = dayKeyLocal(day);
+              const dayEvents = byDay.get(dayKey) ?? [];
               const inMonth = day.getMonth() === month.getMonth();
-              const isToday = isSameDay(day, now);
-              const isSelected = selectedDay ? isSameDay(day, selectedDay) : false;
+              const isToday = dayKey === todayKey;
+              const isSelected = selectedDay ? dayKey === dayKeyLocal(selectedDay) : false;
 
               return (
                 <button
@@ -282,6 +304,9 @@ export default function EventsCalendar({ events, today }: Props) {
                       <span className="text-sm font-medium text-gray-900">{occ.event.title}</span>
                       <span className="mt-0.5 block text-sm text-gray-600">
                         {formatTime(occ.start)} · {CATEGORY_LABELS[occ.event.category]}
+                        {occ.event.rsvpLink && (
+                          <span className="ml-2 font-medium text-primary-600">· Registration open</span>
+                        )}
                       </span>
                     </a>
                   </li>
@@ -317,16 +342,15 @@ export default function EventsCalendar({ events, today }: Props) {
                 {occ.isRecurrenceInstance && (
                   <span className="text-xs text-gray-500">Recurring</span>
                 )}
+                {occ.event.rsvpLink && (
+                  <span className="rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary-700">
+                    Registration open
+                  </span>
+                )}
               </div>
               <h3 className="mt-2 text-lg font-semibold text-gray-900">{occ.event.title}</h3>
               <p className="mt-1 text-sm text-gray-600">
-                {occ.start.toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}{' '}
-                · {formatTime(occ.start)}
+                {formatEventDate(occ.start)} · {formatTime(occ.start)}
               </p>
             </a>
           ))}
