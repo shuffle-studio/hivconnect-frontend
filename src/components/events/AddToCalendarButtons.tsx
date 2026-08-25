@@ -1,8 +1,8 @@
 /**
- * EV2-02 — "Add to calendar" controls for /events/[slug].
+ * EV2-02 - "Add to calendar" controls for /events/[slug].
  *
  * Both links point at the backend Worker, which is the only thing that can
- * serve text/calendar here — the frontend is astro output:'static' on
+ * serve text/calendar here - the frontend is astro output:'static' on
  * Cloudflare Pages and has no server routes.
  *
  * Endpoints (hivconnect-backend/src/endpoints/eventsCalendarFeed.ts):
@@ -56,7 +56,7 @@ export default function AddToCalendarButtons({ eventId, showSubscribe = false }:
           <a href={subscribeUrl} className="font-medium text-primary-600 hover:text-primary-800">
             Subscribe to all events
           </a>{' '}
-          — new and updated events appear in your calendar automatically.
+          New and updated events appear in your calendar automatically.
         </p>
       )}
     </div>

@@ -1,7 +1,7 @@
 import type { Event } from './api';
 
 /**
- * V1 REMEDIATION support — Change Order #1 (Dec 11, 2025) promised, as part of
+ * V1 REMEDIATION support - Change Order #1 (Dec 11, 2025) promised, as part of
  * the already-paid EV001 MVP:
  *   - "Calendar-style display (simple grid view)"
  *   - "Filter by category and date range"
@@ -11,7 +11,7 @@ import type { Event } from './api';
  * (hivconnect-backend/src/fields/eventRecurrence.ts). Backend stores the RULE;
  * we expand on read so one Planning Council entry renders on twelve dates.
  *
- * Pure functions, no DOM — the page is prerendered at build time (output:
+ * Pure functions, no DOM - the page is prerendered at build time (output:
  * 'static') and only the interactive island rehydrates.
  */
 
@@ -166,7 +166,7 @@ export function isSameDay(a: Date, b: Date): boolean {
 
 /**
  * Change Order #1 promised "Timezone handling (EST default)". Without pinning,
- * `toLocaleTimeString` uses the VIEWER's zone — someone reading from California
+ * `toLocaleTimeString` uses the VIEWER's zone - someone reading from California
  * saw the 6:00 PM Medicare session as 3:00 PM. Every displayed time and date
  * below is Eastern, regardless of where the reader is.
  */
@@ -182,7 +182,7 @@ export function dayKeyET(d: Date): string {
 
 /**
  * "YYYY-MM-DD" for a calendar square. Squares are built with `new Date(y, m, d)`
- * — local midnight — so they are read with the viewer's own zone and compared
+ * - local midnight - so they are read with the viewer's own zone and compared
  * against `dayKeyET` as plain strings. Matching on strings rather than
  * timestamps is what keeps an 8pm ET event from sliding into the next square
  * for a reader in Europe.
@@ -216,7 +216,7 @@ export function formatEventDate(d: Date): string {
  *
  * Opening on "today" is wrong for a sparse calendar. With two published events
  * six weeks apart, the day after the August event the page would open on an
- * empty-looking August and hide October two clicks away — which reads as a
+ * empty-looking August and hide October two clicks away - which reads as a
  * broken calendar, not an empty month.
  */
 export function initialMonth(events: Event[], now: Date): Date {
@@ -228,7 +228,7 @@ export function initialMonth(events: Event[], now: Date): Date {
     .filter((d) => d.getTime() >= now.getTime())
     .sort((a, b) => a.getTime() - b.getTime());
 
-  // Something still to come this month — stay put.
+  // Something still to come this month - stay put.
   if (upcoming.some((d) => d <= monthEnd)) return thisMonth;
 
   // Otherwise jump to the next event. Nothing upcoming at all: stay on today,

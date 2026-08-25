@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 /**
- * EV2-04 — on-site RSVP.
+ * EV2-04 - on-site RSVP.
  *
  * Posts to the backend Worker's standard Payload create route; the collection's
  * hooks handle Turnstile, capacity and waitlisting
@@ -10,10 +10,10 @@ import { useState } from 'react';
  * CSP: public/_headers already allowlists connect-src to
  * login.hivconnectcentralnj.com and challenges.cloudflare.com, so this island
  * needs no header change. (The stale netlify.toml in this repo has a much
- * narrower connect-src — delete that file, do not sync it.)
+ * narrower connect-src - delete that file, do not sync it.)
  *
  * Turnstile widget loading follows the existing pattern in
- * src/components/forms/PlanningCouncilForm.tsx — reuse that, don't reinvent it.
+ * src/components/forms/PlanningCouncilForm.tsx - reuse that, don't reinvent it.
  */
 
 const BACKEND =
@@ -187,7 +187,7 @@ export default function EventRsvpForm({
           <span>You may contact me about this event.</span>
         </label>
 
-        {/* Mount the Turnstile widget here — same pattern as PlanningCouncilForm.tsx */}
+        {/* Mount the Turnstile widget here - same pattern as PlanningCouncilForm.tsx */}
 
         {state === 'error' && (
           <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-800">
@@ -203,7 +203,7 @@ export default function EventRsvpForm({
           {state === 'submitting'
             ? 'Submitting…'
             : priceCents > 0
-              ? `Continue to payment — $${(priceCents / 100).toFixed(2)}`
+              ? `Continue to payment: $${(priceCents / 100).toFixed(2)}`
               : 'Register'}
         </button>
       </div>

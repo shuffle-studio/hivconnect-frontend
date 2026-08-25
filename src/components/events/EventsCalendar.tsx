@@ -17,7 +17,7 @@ import {
 } from '../../lib/eventsCalendar';
 
 /**
- * V1 REMEDIATION — Change Order #1 (Dec 11, 2025), EV001 frontend deliverables:
+ * V1 REMEDIATION - Change Order #1 (Dec 11, 2025), EV001 frontend deliverables:
  *   "Calendar-style display (simple grid view)"
  *   "Filter by category and date range"
  *   "Mobile responsive design"
@@ -29,7 +29,7 @@ import {
  * Cloudflare Pages), events are passed in as props from the .astro frontmatter,
  * and this island only handles view state. No client fetch, no SSR needed.
  *
- * Mount with client:load in src/pages/events/index.astro — see the wiring note
+ * Mount with client:load in src/pages/events/index.astro - see the wiring note
  * in the scaffold spec.
  */
 
