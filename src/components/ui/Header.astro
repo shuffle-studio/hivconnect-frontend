@@ -101,6 +101,18 @@ try {
       
       <!-- Emergency Contact & Language Toggle -->
       <div class="flex items-center space-x-4">
+        <!-- Search. A plain link, not a live input: the header is on every
+             page and should not ship the search island everywhere. -->
+        <a
+          href="/search"
+          class="p-2 rounded-md text-gray-700 hover:text-primary-600 hover:bg-gray-100 transition-colors"
+          aria-label="Search the site"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+          </svg>
+        </a>
+
         <!-- Language Toggle -->
         <AstroLanguageSwitcher />
         

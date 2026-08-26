@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/ui/Header.astro';
+import Footer from '../../components/ui/Footer.astro';
+import SiteSearch from '../../components/search/SiteSearch';
+
+const title = 'Search';
+const description = 'Search providers, events, resources, FAQs, and documents across HIV Connect Central NJ.';
+---
+
+<BaseLayout title={title} description={description}>
+  <Header />
+  <main>
+    <div class="min-h-screen bg-stone-50 py-12">
+      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <h1 class="mb-6 text-4xl font-bold tracking-tight text-gray-900">Search</h1>
+        <SiteSearch client:load />
+      </div>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
