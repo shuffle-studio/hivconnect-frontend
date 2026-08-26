@@ -12,10 +12,6 @@ export interface Props {
 const { title, description, type = 'website', image } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const currentLanguage = getCurrentLanguage(Astro.currentLocale);
-
-// hreflang pairs — only for routes that exist in both languages (currently the homepage)
-const pathname = Astro.url.pathname;
-const hasSpanishCounterpart = pathname === '/' || pathname === '/es/' || pathname === '/es';
 ---
 
 <!DOCTYPE html>
@@ -30,14 +26,7 @@ const hasSpanishCounterpart = pathname === '/' || pathname === '/es/' || pathnam
   <title>{title} | HIV Connect Central NJ</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={canonicalURL} />
-  {hasSpanishCounterpart && (
-    <>
-      <link rel="alternate" hreflang="en" href={new URL('/', Astro.site)} />
-      <link rel="alternate" hreflang="es" href={new URL('/es/', Astro.site)} />
-      <link rel="alternate" hreflang="x-default" href={new URL('/', Astro.site)} />
-    </>
-  )}
-
+  
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content={type} />
   <meta property="og:url" content={canonicalURL} />
@@ -56,6 +45,9 @@ const hasSpanishCounterpart = pathname === '/' || pathname === '/es/' || pathnam
   <!-- Accessibility -->
   <meta name="theme-color" content="#0D9488" />
 
+  <!-- Plausible Analytics (self-hosted, privacy-friendly) -->
+  <script defer data-domain="hivconnectcentralnj.com" src="https://analytics.shufflestudio.io/js/script.js"></script>
+
   <!-- Preload critical fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -68,7 +60,7 @@ const hasSpanishCounterpart = pathname === '/' || pathname === '/es/' || pathnam
       "@type": "MedicalOrganization",
       "name": "HIV Connect Central NJ",
       "description": "Comprehensive HIV care coordination and resources for Middlesex, Somerset, and Hunterdon counties in New Jersey",
-      "url": "https://hivconnectcentralnj.com",
+      "url": "https://hivconnectcnj.org",
       "areaServed": [
         {
           "@type": "AdministrativeArea",
