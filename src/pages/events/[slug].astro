@@ -3,6 +3,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { fetchEventBySlug, extractTextFromLexical } from '../../lib/api';
 import type { Event } from '../../lib/api';
 import EventMap from '../../components/events/EventMap';
+import {
+  describeRecurrence,
+  formatEventDate,
+  formatTime as formatTimeET,
+  upcomingOccurrences,
+} from '../../lib/eventsCalendar';
 
 // Define getStaticPaths for build-time static generation
 export async function getStaticPaths() {
@@ -55,25 +61,14 @@ if (!finalEvent && !error) {
   return Astro.redirect('/404');
 }
 
-// Helper to format date
+// Dates and times pinned to Eastern. The page is prerendered on a UTC build
+// machine, so unpinned toLocale* calls printed a 6:00 PM event as 10:00 PM.
 function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  return formatEventDate(new Date(dateString));
 }
 
-// Helper to format time
 function formatTime(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
+  return formatTimeET(new Date(dateString));
 }
 
 // Helper to get category label
@@ -90,10 +85,20 @@ function getCategoryLabel(category: string): string {
   return labels[category] || category;
 }
 
-// Helper to check if event is in the past
-function isPastEvent(dateString: string): boolean {
-  return new Date(dateString) < new Date();
-}
+// Recurring series: lead with the next date, not the first one. "Next" is as
+// of the last build; the repeat pattern line below it never goes stale.
+const buildNow = new Date();
+const repeatPattern = finalEvent ? describeRecurrence(finalEvent) : null;
+const nextDates = finalEvent && repeatPattern ? upcomingOccurrences(finalEvent, buildNow, 4) : [];
+const displayStart = nextDates[0]?.start.toISOString() ?? finalEvent?.startDate ?? '';
+const displayEnd = nextDates[0]?.end?.toISOString() ?? (nextDates[0] ? null : finalEvent?.endDate);
+
+// A series is only past once it has no dates left.
+const isPast = finalEvent
+  ? repeatPattern
+    ? nextDates.length === 0
+    : new Date(finalEvent.startDate) < buildNow
+  : false;
 
 // Meta information
 const title = finalEvent ? `${finalEvent.title} | HIV Connect Central NJ` : 'Event Not Found';
@@ -228,7 +233,7 @@ const eventSchema = finalEvent ? buildEventSchema(finalEvent) : null;
                   Featured
                 </span>
               )}
-              {isPastEvent(finalEvent.startDate) && (
+              {isPast && (
                 <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
                   Past Event
                 </span>
@@ -247,13 +252,21 @@ const eventSchema = finalEvent ? buildEventSchema(finalEvent) : null;
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <div>
-                  <div class="text-lg font-semibold text-gray-900">{formatDate(finalEvent.startDate)}</div>
+                  <div class="text-lg font-semibold text-gray-900">{formatDate(displayStart)}</div>
                   <div class="text-gray-600 mt-1">
-                    {formatTime(finalEvent.startDate)}
-                    {finalEvent.endDate && (
-                      <span> - {formatTime(finalEvent.endDate)}</span>
+                    {formatTime(displayStart)}
+                    {displayEnd && (
+                      <span> - {formatTime(displayEnd)}</span>
                     )}
                   </div>
+                  {repeatPattern && (
+                    <div class="text-gray-700 mt-2 font-medium">{repeatPattern}</div>
+                  )}
+                  {nextDates.length > 1 && (
+                    <div class="text-sm text-gray-600 mt-2">
+                      Also: {nextDates.slice(1).map((o) => formatDate(o.start.toISOString())).join('; ')}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

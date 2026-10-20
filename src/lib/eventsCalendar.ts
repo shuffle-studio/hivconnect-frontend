@@ -67,11 +67,66 @@ function parseUntil(value: string): Date | null {
   );
 }
 
+/** Eastern wall-clock fields for an instant. month is 0-based, like Date. */
+interface WallClock {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+}
+
+function easternWallClock(d: Date): WallClock {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: EVENT_TZ,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    hourCycle: 'h23',
+  }).formatToParts(d);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  return { year: get('year'), month: get('month') - 1, day: get('day'), hour: get('hour'), minute: get('minute') };
+}
+
+/**
+ * The instant at which Eastern clocks read this wall time. Recurrence is
+ * stepped on the Eastern calendar and converted here, so a 6:00 PM meeting
+ * stays 6:00 PM across the DST change instead of sliding to 5:00 PM in winter.
+ */
+function easternInstant(w: WallClock): Date {
+  const asUtc = Date.UTC(w.year, w.month, w.day, w.hour, w.minute);
+  let instant = asUtc;
+  // Two passes settle the offset either side of a DST boundary.
+  for (let i = 0; i < 2; i++) {
+    const seen = easternWallClock(new Date(instant));
+    const seenAsUtc = Date.UTC(seen.year, seen.month, seen.day, seen.hour, seen.minute);
+    instant += asUtc - seenAsUtc;
+  }
+  return new Date(instant);
+}
+
+/** Day-of-month of the nth (1..4, or -1 for last) `weekday` in a month. */
+function nthWeekdayOfMonth(year: number, month: number, weekday: number, nth: number): number | null {
+  const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  if (nth > 0) {
+    const firstDow = new Date(Date.UTC(year, month, 1)).getUTCDay();
+    const day = 1 + ((weekday - firstDow + 7) % 7) + (nth - 1) * 7;
+    return day <= daysInMonth ? day : null;
+  }
+  const lastDow = new Date(Date.UTC(year, month, daysInMonth)).getUTCDay();
+  return daysInMonth - ((lastDow - weekday + 7) % 7);
+}
+
 /**
  * Expand one event into its occurrences within [rangeStart, rangeEnd].
  *
- * Hard-capped at 200 occurrences. An RRULE with no UNTIL and no COUNT is a
- * content-entry mistake, not a reason to hang the browser.
+ * Dates are stepped on the Eastern calendar (EVENT_TZ), the same calendar the
+ * backend reads weekdays from when it writes the RRULE. COUNT counts every
+ * occurrence from the first, including ones before the range. Hard-capped at
+ * 200 occurrences; an RRULE with no UNTIL and no COUNT is a content-entry
+ * mistake, not a reason to hang the browser.
  */
 export function expandEvent(event: Event, rangeStart: Date, rangeEnd: Date): EventOccurrence[] {
   const baseStart = new Date(event.startDate);
@@ -90,57 +145,113 @@ export function expandEvent(event: Event, rangeStart: Date, rangeEnd: Date): Eve
   const until = rule.UNTIL ? parseUntil(rule.UNTIL) : null;
   const hardStop = until && until < rangeEnd ? until : rangeEnd;
 
-  const skipped = new Set(
+  const skipped = new Set<string>(
     ((event as any).recurrence?.exceptions ?? [])
       .map((e: any) => e?.date)
       .filter(Boolean)
-      .map((d: string) => new Date(d).toDateString()),
+      .map((d: string) => dayKeyET(new Date(d))),
   );
 
+  const base = easternWallClock(baseStart);
+  const at = (year: number, month: number, day: number) =>
+    easternInstant({ year, month, day, hour: base.hour, minute: base.minute });
+
   const out: EventOccurrence[] = [];
-  const push = (start: Date) => {
-    if (skipped.has(start.toDateString())) return;
-    if (start < rangeStart || start > hardStop) return;
-    out.push({
-      event,
-      start,
-      end: durationMs ? new Date(start.getTime() + durationMs) : null,
-      isRecurrenceInstance: start.getTime() !== baseStart.getTime(),
-    });
+  let emitted = 0;
+  let done = false;
+  // Returns false once the series is over, so the caller stops stepping.
+  const emit = (start: Date): boolean => {
+    if (start < baseStart) return true;
+    if (start > hardStop || emitted >= maxCount || out.length >= 200) {
+      done = true;
+      return false;
+    }
+    emitted += 1;
+    if (start >= rangeStart && !skipped.has(dayKeyET(start))) {
+      out.push({
+        event,
+        start,
+        end: durationMs ? new Date(start.getTime() + durationMs) : null,
+        isRecurrenceInstance: start.getTime() !== baseStart.getTime(),
+      });
+    }
+    return true;
   };
 
-  let emitted = 0;
-  const cursor = new Date(baseStart);
+  const byDay = (rule.BYDAY ?? '').split(',').filter(Boolean);
 
-  while (cursor <= hardStop && emitted < maxCount && out.length < 200) {
-    if (rule.FREQ === 'WEEKLY' && rule.BYDAY) {
-      const days = rule.BYDAY.split(',');
-      // Walk the week containing `cursor` and emit each selected weekday.
-      const weekStart = new Date(cursor);
-      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-      for (const code of days) {
-        const idx = WEEKDAY_CODES.indexOf(code);
-        if (idx < 0) continue;
-        const occ = new Date(weekStart);
-        occ.setDate(weekStart.getDate() + idx);
-        occ.setHours(baseStart.getHours(), baseStart.getMinutes(), 0, 0);
-        if (occ >= baseStart) push(occ);
+  for (let step = 0; !done && step < 2000; step++) {
+    if (rule.FREQ === 'DAILY') {
+      emit(at(base.year, base.month, base.day + step * interval));
+    } else if (rule.FREQ === 'WEEKLY') {
+      // Sunday of the base week, then each selected weekday in order.
+      const baseDow = new Date(Date.UTC(base.year, base.month, base.day)).getUTCDay();
+      const weekStart = base.day - baseDow + step * 7 * interval;
+      const days = byDay.length ? byDay : [WEEKDAY_CODES[baseDow]];
+      const idxs = days.map((c) => WEEKDAY_CODES.indexOf(c)).filter((i) => i >= 0).sort();
+      for (const idx of idxs) {
+        if (!emit(at(base.year, base.month, weekStart + idx))) break;
       }
-      emitted += 1;
-      cursor.setDate(cursor.getDate() + 7 * interval);
-      continue;
+    } else if (rule.FREQ === 'MONTHLY') {
+      const monthIndex = base.month + step * interval;
+      const year = base.year + Math.floor(monthIndex / 12);
+      const month = ((monthIndex % 12) + 12) % 12;
+      const nthMatch = /^(-?\d)([A-Z]{2})$/.exec(byDay[0] ?? '');
+      const day = nthMatch
+        ? nthWeekdayOfMonth(year, month, WEEKDAY_CODES.indexOf(nthMatch[2]), Number(nthMatch[1]))
+        : base.day <= new Date(Date.UTC(year, month + 1, 0)).getUTCDate()
+          ? base.day
+          : null; // RFC 5545: the 31st skips months without one.
+      if (day !== null) emit(at(year, month, day));
+      else if (at(year, month, 1) > hardStop) done = true;
+    } else {
+      break;
     }
-
-    push(new Date(cursor));
-    emitted += 1;
-
-    if (rule.FREQ === 'DAILY') cursor.setDate(cursor.getDate() + interval);
-    else if (rule.FREQ === 'WEEKLY') cursor.setDate(cursor.getDate() + 7 * interval);
-    else if (rule.FREQ === 'MONTHLY') cursor.setMonth(cursor.getMonth() + interval);
-    else break;
   }
 
   return out.sort((a, b) => a.start.getTime() - b.start.getTime());
+}
+
+const ORDINALS: Record<string, string> = { '1': '1st', '2': '2nd', '3': '3rd', '4': '4th', '-1': 'last' };
+const WEEKDAY_NAMES: Record<string, string> = {
+  SU: 'Sunday', MO: 'Monday', TU: 'Tuesday', WE: 'Wednesday', TH: 'Thursday', FR: 'Friday', SA: 'Saturday',
+};
+
+/**
+ * Plain-English repeat pattern for a recurring event, e.g. "Repeats on the 4th
+ * Tuesday of every month". Null for one-off events. Unlike a computed "next
+ * date", this can't go stale between static rebuilds.
+ */
+export function describeRecurrence(event: Event): string | null {
+  const rrule = (event as any).recurrence?.rrule as string | undefined;
+  if (!rrule) return null;
+  const rule = parseRRule(rrule);
+  const n = Number(rule.INTERVAL) || 1;
+  const days = (rule.BYDAY ?? '').split(',').filter(Boolean);
+
+  if (rule.FREQ === 'DAILY') return n > 1 ? `Repeats every ${n} days` : 'Repeats daily';
+  if (rule.FREQ === 'WEEKLY') {
+    const names = days.map((d) => WEEKDAY_NAMES[d]).filter(Boolean).join(', ');
+    const every = n > 1 ? `every ${n} weeks` : 'weekly';
+    return names ? `Repeats ${every} on ${names}` : `Repeats ${every}`;
+  }
+  if (rule.FREQ === 'MONTHLY') {
+    const every = n > 1 ? `every ${n} months` : 'every month';
+    const m = /^(-?\d)([A-Z]{2})$/.exec(days[0] ?? '');
+    if (m && ORDINALS[m[1]] && WEEKDAY_NAMES[m[2]]) {
+      return `Repeats on the ${ORDINALS[m[1]]} ${WEEKDAY_NAMES[m[2]]} of ${every}`;
+    }
+    const day = easternWallClock(new Date(event.startDate)).day;
+    const suffix = day % 10 === 1 && day !== 11 ? 'st' : day % 10 === 2 && day !== 12 ? 'nd' : day % 10 === 3 && day !== 13 ? 'rd' : 'th';
+    return `Repeats on the ${day}${suffix} of ${every}`;
+  }
+  return null;
+}
+
+/** The next `limit` occurrences on or after `now`. */
+export function upcomingOccurrences(event: Event, now: Date, limit = 3): EventOccurrence[] {
+  const horizon = new Date(now.getTime() + 2 * 365 * MS_DAY);
+  return expandEvent(event, now, horizon).slice(0, limit);
 }
 
 export function expandAll(events: Event[], rangeStart: Date, rangeEnd: Date): EventOccurrence[] {
