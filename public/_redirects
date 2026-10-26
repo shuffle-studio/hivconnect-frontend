@@ -13,3 +13,41 @@ https://www.hivconnectcentralnj.com/* https://hivconnectcentralnj.com/:splat 301
 /blog/* /resources/ 301
 /services/* /find-services/ 301
 /testing/* /get-tested/ 301
+
+# --- Search Console "Not found (404)" report, Oct 25 2026 (SHU-1189) ---
+# 76 URLs, every one WordPress-era. Three families.
+
+# 1. WPML. The old site served every page a second time under /es/. The new
+# site has one Spanish page, /es/ itself, which is why there is no /es/*
+# catch-all here: it would send /es/ to /. Provider and location pages are
+# keyed by id now, so the old slugs land on the directory.
+/es/providers/* /find-services/ 301
+/es/location/* /find-services/ 301
+/es/provider-types/ /provider-types/ 301
+/es/preguntas-frecuentes/ /faq/ 301
+/es/eventos/* /events/ 301
+/es/centro-de-salud-eric-b-chandler/ /find-services/ 301
+/es/servicios-legales-del-noroeste-de-jersey/ /find-services/ 301
+/es/servicios-de-tratamiento-de-somerset/ /find-services/ 301
+/es/movil-de-zufall-health-delta-dental/ /find-services/ 301
+
+# English location pages from WordPress, same reason.
+/location/* /find-services/ 301
+
+# 2. The Events Calendar (tribe_events): paginated archives (/page/N/ with a
+# post_type query), month and list views, iCal feeds and date-only event
+# slugs. All of it is the events page now. No /events/* catch-all: /events/<slug>
+# is a live route.
+/page/* /events/ 301
+/events/list /events/ 301
+/events/list/* /events/ 301
+/events/month/* /events/ 301
+/events/2025-05-14/ /events/ 301
+/events/2026-03-04/ /events/ 301
+/events/planning-council-december-2025/ /events/ 301
+
+# 3. WordPress pages that exist under a new name.
+/planning-council/ /about/ 301
+/planning-council-membership/ /planning-council-application/ 301
+/universal-service-standards/ /service-standards/ 301
+/join-support-group/ /support-resources/ 301
